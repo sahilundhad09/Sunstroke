@@ -11,56 +11,47 @@ function LinkedInIcon({ className }: { className?: string }) {
   );
 }
 
-function XIcon({ className }: { className?: string }) {
+function InstagramIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051c-.058 1.28-.072 1.688-.072 4.949 0 3.261.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.261 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.261-.014-3.669-.072-4.949C23.73 2.692 21.311.273 16.95.072 15.67.014 15.262 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a3.838 3.838 0 110-7.676A3.838 3.838 0 0112 16zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
     </svg>
   );
 }
 
-function GitHubIcon({ className }: { className?: string }) {
+function PinterestIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
-    </svg>
-  );
-}
-
-function YouTubeIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+      <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.965 1.406-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146 1.124.347 2.317.535 3.554.535 6.607 0 11.985-5.36 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/>
     </svg>
   );
 }
 
 const socialLinks = [
   { icon: LinkedInIcon, href: siteConfig.links.linkedin, label: "LinkedIn" },
-  { icon: XIcon, href: siteConfig.links.twitter, label: "Twitter" },
-  { icon: GitHubIcon, href: siteConfig.links.github, label: "GitHub" },
-  { icon: YouTubeIcon, href: siteConfig.links.youtube, label: "YouTube" },
+  { icon: InstagramIcon, href: (siteConfig.links as any).instagram, label: "Instagram" },
+  { icon: PinterestIcon, href: (siteConfig.links as any).pinterest, label: "Pinterest" },
 ];
 
 export function Footer() {
   return (
-    <footer className="relative border-t border-sunstroke-border bg-sunstroke-dark">
-      <div className="section-divider" />
+    <footer className="relative border-t-3 border-black bg-white text-black">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className="grid gap-10 lg:grid-cols-4 lg:gap-8">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <Link href="/" className="inline-block">
-              <Image src="/logo.png" alt="Sunstroke" width={120} height={32} className="h-7" style={{ width: "auto", height: "auto", maxHeight: "28px" }} />
+            <Link href="/" className="inline-flex items-center gap-2.5">
+              <Image src="/logo.png" alt="Sunstroke Logo" width={32} height={32} className="h-8 w-8 rounded-lg border-2 border-black object-cover shadow-gumroad-sm" />
+              <span className="font-heading font-black tracking-widest text-black text-lg uppercase">SUNSTROKE</span>
             </Link>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-sunstroke-text-muted">
+            <p className="mt-4 max-w-xs text-sm font-bold leading-relaxed text-zinc-700">
               Building AI tools, digital products, and sharing the best software for creators and indie builders.
             </p>
             <div className="mt-5 flex gap-3">
               {socialLinks.map((social) => (
                 <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.label}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-sunstroke-border text-sunstroke-text-dim transition-all hover:border-sunstroke-cyan/30 hover:text-sunstroke-cyan hover:bg-sunstroke-surface/50">
-                  <social.icon className="h-4 w-4" />
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-black bg-[#ffc700] text-black shadow-gumroad-sm transition-transform active:translate-x-[2px] active:translate-y-[2px]">
+                  <social.icon className="h-4 w-4 stroke-[2]" />
                 </a>
               ))}
             </div>
@@ -69,26 +60,26 @@ export function Footer() {
           {/* Links */}
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-2">
             <div>
-              <h4 className="text-xs font-semibold tracking-wider text-white uppercase">Product</h4>
+              <h4 className="font-heading font-black tracking-wider text-black uppercase text-xs">Product</h4>
               <ul className="mt-4 space-y-2.5">
                 {footerLinks.product.map((link) => (
-                  <li key={link.href}><Link href={link.href} className="text-sm text-sunstroke-text-muted transition-colors hover:text-sunstroke-cyan">{link.label}</Link></li>
+                  <li key={link.href}><Link href={link.href} className="text-sm font-bold text-zinc-800 transition-colors hover:text-black hover:underline">{link.label}</Link></li>
                 ))}
               </ul>
             </div>
             <div>
-              <h4 className="text-xs font-semibold tracking-wider text-white uppercase">Company</h4>
+              <h4 className="font-heading font-black tracking-wider text-black uppercase text-xs">Company</h4>
               <ul className="mt-4 space-y-2.5">
                 {footerLinks.company.map((link) => (
-                  <li key={link.href}><Link href={link.href} className="text-sm text-sunstroke-text-muted transition-colors hover:text-sunstroke-cyan">{link.label}</Link></li>
+                  <li key={link.href}><Link href={link.href} className="text-sm font-bold text-zinc-800 transition-colors hover:text-black hover:underline">{link.label}</Link></li>
                 ))}
               </ul>
             </div>
             <div>
-              <h4 className="text-xs font-semibold tracking-wider text-white uppercase">Legal</h4>
+              <h4 className="font-heading font-black tracking-wider text-black uppercase text-xs">Legal</h4>
               <ul className="mt-4 space-y-2.5">
                 {footerLinks.legal.map((link) => (
-                  <li key={link.href}><Link href={link.href} className="text-sm text-sunstroke-text-muted transition-colors hover:text-sunstroke-cyan">{link.label}</Link></li>
+                  <li key={link.href}><Link href={link.href} className="text-sm font-bold text-zinc-800 transition-colors hover:text-black hover:underline">{link.label}</Link></li>
                 ))}
               </ul>
             </div>
@@ -96,16 +87,16 @@ export function Footer() {
 
           {/* Newsletter */}
           <div>
-            <h4 className="text-xs font-semibold tracking-wider text-white uppercase">Stay Updated</h4>
-            <p className="mt-3 text-sm text-sunstroke-text-muted">Get weekly insights on AI tools, creator strategies, and new products.</p>
+            <h4 className="font-heading font-black tracking-wider text-black uppercase text-xs">Stay Updated</h4>
+            <p className="mt-3 text-sm font-bold text-zinc-700">Get weekly insights on AI tools, creator strategies, and new products.</p>
             <div className="mt-4">
               <NewsletterForm source="footer" variant="stacked" showPrivacy={false} buttonText="Join" />
             </div>
           </div>
         </div>
 
-        <div className="mt-12 border-t border-sunstroke-border/50 pt-6">
-          <p className="text-center text-xs text-sunstroke-text-dim">© {new Date().getFullYear()} Sunstroke. All rights reserved.</p>
+        <div className="mt-12 border-t-2 border-black pt-6">
+          <p className="text-center text-xs font-bold text-zinc-600">© {new Date().getFullYear()} Sunstroke. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -1,34 +1,39 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { type ReactNode } from "react";
+import { useRef } from "react";
+import { motion, useInView } from "framer-motion";
 
-interface StaggerContainerProps {
-  children: ReactNode;
-  className?: string;
-  staggerDelay?: number;
-  once?: boolean;
-}
+const containerVariants = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.09, delayChildren: 0.05 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 22, scale: 0.97 },
+  show: {
+    opacity: 1, y: 0, scale: 1,
+    transition: { duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] as any },
+  },
+};
 
 export function StaggerContainer({
   children,
-  className,
-  staggerDelay = 0.1,
-  once = true,
-}: StaggerContainerProps) {
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-60px" });
+
   return (
     <motion.div
+      ref={ref}
+      variants={containerVariants}
       initial="hidden"
-      whileInView="visible"
-      viewport={{ once, amount: 0.2 }}
-      variants={{
-        hidden: {},
-        visible: {
-          transition: {
-            staggerChildren: staggerDelay,
-          },
-        },
-      }}
+      animate={isInView ? "show" : "hidden"}
       className={className}
     >
       {children}
@@ -36,27 +41,15 @@ export function StaggerContainer({
   );
 }
 
-interface StaggerItemProps {
-  children: ReactNode;
+export function StaggerItem({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
   className?: string;
-}
-
-export function StaggerItem({ children, className }: StaggerItemProps) {
+}) {
   return (
-    <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-          opacity: 1,
-          y: 0,
-          transition: {
-            duration: 0.5,
-            ease: [0.21, 0.47, 0.32, 0.98],
-          },
-        },
-      }}
-      className={className}
-    >
+    <motion.div variants={itemVariants} className={className}>
       {children}
     </motion.div>
   );

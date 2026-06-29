@@ -13,6 +13,7 @@ export function PillarsSection() {
           badge="What I Do"
           title="Three Pillars of Sunstroke"
           subtitle="Everything I create is designed to help creators and indie builders succeed with modern tools."
+          accentColor="cyan"
         />
 
         <StaggerContainer className="grid gap-6 md:grid-cols-3">

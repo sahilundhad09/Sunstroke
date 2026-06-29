@@ -1,60 +1,49 @@
 "use client";
 
-import { motion, type Variants } from "framer-motion";
-import { type ReactNode } from "react";
+import { useRef } from "react";
+import { motion, useInView } from "framer-motion";
 
 interface FadeInProps {
-  children: ReactNode;
+  children: React.ReactNode;
+  className?: string;
   direction?: "up" | "down" | "left" | "right" | "none";
   delay?: number;
   duration?: number;
-  className?: string;
   once?: boolean;
-  amount?: number;
+  distance?: number;
 }
-
-const directionVariants: Record<string, Variants> = {
-  up: {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0 },
-  },
-  down: {
-    hidden: { opacity: 0, y: -30 },
-    visible: { opacity: 1, y: 0 },
-  },
-  left: {
-    hidden: { opacity: 0, x: 30 },
-    visible: { opacity: 1, x: 0 },
-  },
-  right: {
-    hidden: { opacity: 0, x: -30 },
-    visible: { opacity: 1, x: 0 },
-  },
-  none: {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-  },
-};
 
 export function FadeIn({
   children,
+  className = "",
   direction = "up",
   delay = 0,
-  duration = 0.6,
-  className,
+  duration = 0.55,
   once = true,
-  amount = 0.3,
+  distance = 24,
 }: FadeInProps) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once, margin: "-60px" });
+
+  const dirMap = {
+    up: { y: distance, x: 0 },
+    down: { y: -distance, x: 0 },
+    left: { y: 0, x: distance },
+    right: { y: 0, x: -distance },
+    none: { y: 0, x: 0 },
+  };
+
+  const offset = dirMap[direction];
+
   return (
     <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once, amount }}
-      variants={directionVariants[direction]}
+      ref={ref}
+      initial={{ opacity: 0, ...offset }}
+      animate={isInView ? { opacity: 1, x: 0, y: 0 } : {}}
       transition={{
         duration,
         delay,
-        ease: [0.21, 0.47, 0.32, 0.98],
+        ease: [0.21, 0.47, 0.32, 0.98] as any,
       }}
       className={className}
     >

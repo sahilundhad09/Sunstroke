@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Send, CheckCircle, Shield } from "lucide-react";
-import { CTAButton } from "./CTAButton";
 import type { ApiResponse } from "@/types";
 
 const subscribeSchema = z.object({
@@ -67,11 +66,11 @@ export function NewsletterForm({
 
   if (submitted) {
     return (
-      <div className={`flex items-center gap-3 rounded-xl border border-green-500/20 bg-green-500/5 p-4 ${className}`}>
-        <CheckCircle className="h-5 w-5 shrink-0 text-green-400" />
+      <div className={`flex items-center gap-3 rounded-xl border-2 border-black bg-[#00e599] p-4 text-black shadow-gumroad-sm ${className}`}>
+        <CheckCircle className="h-5 w-5 shrink-0 text-black stroke-[2.5]" />
         <div>
-          <p className="font-medium text-green-300">You&apos;re in!</p>
-          <p className="text-sm text-green-400/70">
+          <p className="font-heading font-black text-black">You&apos;re in!</p>
+          <p className="text-xs font-bold text-zinc-900">
             Check your inbox for a welcome email.
           </p>
         </div>
@@ -94,34 +93,32 @@ export function NewsletterForm({
             type="email"
             placeholder={placeholder}
             {...register("email")}
-            className="h-12 w-full rounded-xl border border-sunstroke-border bg-sunstroke-surface/60 px-4 text-sm text-white placeholder:text-sunstroke-text-dim focus:border-sunstroke-cyan/40 focus:outline-none focus:ring-1 focus:ring-sunstroke-cyan/20 transition-colors backdrop-blur-sm"
+            className="h-12 w-full rounded-xl border-2 border-black bg-white px-4 text-sm font-bold text-black placeholder:text-zinc-500 shadow-gumroad-sm focus:outline-none focus:ring-2 focus:ring-black transition-all"
             disabled={isSubmitting}
           />
           {errors.email && (
-            <p className="absolute -bottom-5 left-0 text-xs text-red-400">
+            <p className="absolute -bottom-5 left-0 text-xs font-bold text-red-600">
               {errors.email.message}
             </p>
           )}
         </div>
-        <CTAButton
+        <button
           type="submit"
-          variant="primary"
-          loading={isSubmitting}
           disabled={isSubmitting}
-          className="h-12 whitespace-nowrap"
+          className="btn-gumroad h-12 whitespace-nowrap px-6 text-xs font-black uppercase tracking-wider gap-2"
         >
-          <Send className="h-4 w-4" />
+          <Send className="h-4 w-4 stroke-[2.5]" />
           {buttonText}
-        </CTAButton>
+        </button>
       </form>
 
       {error && (
-        <p className="mt-2 text-sm text-red-400">{error}</p>
+        <p className="mt-2 text-sm font-bold text-red-600">{error}</p>
       )}
 
       {showPrivacy && (
-        <p className="mt-3 flex items-center gap-1.5 text-xs text-sunstroke-text-dim">
-          <Shield className="h-3 w-3" />
+        <p className="mt-3 flex items-center gap-1.5 text-xs font-bold text-zinc-700">
+          <Shield className="h-3.5 w-3.5 stroke-[2]" />
           No spam, ever. Unsubscribe anytime.
         </p>
       )}

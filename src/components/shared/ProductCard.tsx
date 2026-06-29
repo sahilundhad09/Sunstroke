@@ -1,53 +1,113 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowUpRight, ShoppingBag } from "lucide-react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { ShoppingCart, Star, ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 interface ProductCardProps {
+  id?: string;
   title: string;
-  description: string;
-  price: string;
-  category: string;
-  href: string;
+  description?: string;
+  price: string | number;
+  badge?: string;
+  rating?: number;
+  href?: string;
+  purchase_url?: string;
+  tags?: string[];
+  image_url?: string;
 }
 
 export function ProductCard({
   title,
   description,
   price,
-  category,
+  badge,
+  rating = 5.0,
   href,
+  purchase_url,
+  tags = [],
+  image_url,
 }: ProductCardProps) {
+  const isFree = price === 0 || price === "0" || String(price).toLowerCase() === "free";
+  const priceDisplay = isFree ? "FREE" : typeof price === "number" ? `$${price}` : price;
+  const linkUrl = href || purchase_url || "#";
+
   return (
-    <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.25 }}>
+    <motion.div
+      whileHover={{ y: -6, scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className="h-full"
+    >
       <Link
-        href={href}
-        className="group relative block overflow-hidden rounded-2xl border border-sunstroke-border bg-sunstroke-surface/40 transition-all duration-300 hover:border-sunstroke-border-hover hover:bg-sunstroke-surface/60 backdrop-blur-sm"
+        href={linkUrl}
+        className="group flex h-full flex-col justify-between overflow-hidden rounded-3xl border-4 border-black bg-white shadow-gumroad transition-all duration-200 hover:shadow-gumroad-lg"
       >
-        {/* Thumbnail area */}
-        <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-sunstroke-surface to-sunstroke-dark">
-          <ShoppingBag className="h-12 w-12 text-sunstroke-cyan/30" />
-          <div className="absolute right-3 top-3 rounded-full bg-sunstroke-cyan px-3 py-1 text-xs font-bold text-sunstroke-dark">
-            {price}
+        <div>
+          {/* Top banner / cover image area */}
+          <div className="relative h-48 border-b-4 border-black bg-[#ff9f0a]">
+            {image_url ? (
+              <Image
+                src={image_url}
+                alt={title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#ff9f0a] to-[#ffc700] p-6 text-center">
+                <span className="font-heading text-3xl font-black text-black opacity-30 select-none">
+                  {title}
+                </span>
+              </div>
+            )}
+
+            {/* Badge overlay */}
+            {badge && (
+              <span className="absolute left-4 top-4 rounded-lg border-2 border-black bg-[#ffc700] px-3 py-1 text-[10px] font-mono font-black uppercase text-black shadow-gumroad-sm">
+                {badge}
+              </span>
+            )}
+
+            {/* Price tag */}
+            <div className={`absolute right-4 top-4 rounded-lg border-2 border-black px-3 py-1.5 text-xs font-mono font-black uppercase shadow-gumroad-sm ${
+              isFree ? "bg-[#00e599] text-black" : "bg-white text-black"
+            }`}>
+              {priceDisplay}
+            </div>
+
+            {/* Icon overlap */}
+            <div className="absolute -bottom-6 left-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-black bg-[#ffc700] shadow-gumroad-sm">
+                <ShoppingCart className="h-5 w-5 text-black stroke-[2.5]" />
+              </div>
+            </div>
+          </div>
+
+          {/* Content Body */}
+          <div className="p-6 pt-10">
+            {rating && (
+              <div className="mb-3 flex items-center gap-1">
+                <Star className="h-4 w-4 fill-[#ffc700] text-black stroke-[2]" />
+                <span className="font-mono text-xs font-black text-black">{rating.toFixed(1)}</span>
+              </div>
+            )}
+
+            <h3 className="font-heading text-2xl font-black text-black group-hover:underline">
+              {title}
+            </h3>
+
+            <p className="mt-3 text-sm font-bold leading-relaxed text-zinc-800 line-clamp-3">
+              {description}
+            </p>
           </div>
         </div>
 
-        <div className="p-5">
-          <span className="text-xs font-medium tracking-wider text-sunstroke-cyan/70 uppercase">
-            {category}
+        {/* Action Button footer */}
+        <div className="p-6 pt-0">
+          <span className="btn-gumroad-gold w-full py-3.5 text-xs font-black uppercase tracking-wider gap-2">
+            Get Product <ArrowRight className="h-4 w-4 stroke-[3]" />
           </span>
-          <h3 className="mt-1.5 text-lg font-bold text-white group-hover:text-sunstroke-cyan transition-colors">
-            {title}
-          </h3>
-          <p className="mt-2 text-sm leading-relaxed text-sunstroke-text-muted">
-            {description}
-          </p>
-
-          <div className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-sunstroke-cyan">
-            Get It Now
-            <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </div>
         </div>
       </Link>
     </motion.div>

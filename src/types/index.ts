@@ -20,6 +20,20 @@ export interface ContactMessage {
   created_at: string;
 }
 
+export interface Tool {
+  id: string;
+  name: string;
+  tagline?: string;
+  description: string;
+  status: "live" | "beta" | "coming-soon";
+  tags: string[];
+  href: string;
+  icon: string;
+  image_url?: string;
+  featured?: boolean;
+  created_at?: string;
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -32,6 +46,9 @@ export interface Product {
   featured: boolean;
   status: string;
   created_at: string;
+  tags?: string[];
+  rating?: number;
+  badge?: string;
 }
 
 export interface Post {
@@ -54,9 +71,11 @@ export interface AffiliateLink {
   url: string;
   category?: string;
   logo_url?: string;
+  image_url?: string;
   recommendation?: string;
   featured: boolean;
   created_at: string;
+  discount?: string;
 }
 
 export interface SubscribeFormData {

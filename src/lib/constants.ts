@@ -7,9 +7,8 @@ export const siteConfig = {
   creator: "Sunstroke",
   links: {
     linkedin: "https://www.linkedin.com/in/sunstroke-ai-30203b416/",
-    twitter: "https://twitter.com/sunstroke_ai",
-    github: "https://github.com/sunstroke-ai",
-    youtube: "https://youtube.com/@sunstroke",
+    instagram: "https://www.instagram.com/sunstroke09/",
+    pinterest: "https://in.pinterest.com/sahilundhad09/",
   },
 };
 
@@ -82,54 +81,71 @@ export const pillars = [
 export const featuredTools = [
   {
     id: "1",
-    title: "AI Content Engine",
-    description: "Generate, optimize, and distribute content across platforms with AI-powered automation.",
+    name: "AI Content Engine",
+    tagline: "Write · Optimize · Distribute",
+    description:
+      "Generate, optimize, and distribute content across platforms with AI-powered automation. 10x your output without sacrificing quality.",
     status: "live" as const,
-    category: "Content",
+    tags: ["Content", "AI", "Automation"],
     href: "#",
+    icon: "⚡",
   },
   {
     id: "2",
-    title: "Smart SEO Analyzer",
-    description: "Deep-dive SEO audits powered by AI with actionable improvement recommendations.",
+    name: "Smart SEO Analyzer",
+    tagline: "Rank Higher, Faster",
+    description:
+      "Deep-dive SEO audits powered by AI with actionable improvement recommendations and competitor analysis.",
     status: "beta" as const,
-    category: "SEO",
+    tags: ["SEO", "Analytics", "AI"],
     href: "#",
+    icon: "🔍",
   },
   {
     id: "3",
-    title: "Creator CRM",
-    description: "Manage collaborations, track leads, and grow your creator network intelligently.",
+    name: "Creator CRM",
+    tagline: "Manage Your Network",
+    description:
+      "Manage collaborations, track leads, and grow your creator network intelligently with AI-assisted insights.",
     status: "coming-soon" as const,
-    category: "Business",
+    tags: ["CRM", "Business", "Network"],
     href: "#",
+    icon: "🤝",
   },
 ] as const;
 
 export const featuredProducts = [
   {
     id: "1",
-    title: "The Creator's AI Playbook",
-    description: "A comprehensive guide to leveraging AI tools for content creation, automation, and growth.",
-    price: "$29",
-    category: "Guide",
+    name: "The Creator's AI Playbook",
+    description:
+      "A comprehensive guide to leveraging AI tools for content creation, automation, and growth. 80+ pages of actionable strategies.",
+    price: 29 as number | "free",
     href: "#",
+    badge: "Bestseller",
+    tags: ["Guide", "AI", "Strategy"],
+    rating: 4.9,
   },
   {
     id: "2",
-    title: "Notion Creator Dashboard",
-    description: "All-in-one Notion workspace for managing content, projects, and revenue as a creator.",
-    price: "$19",
-    category: "Template",
+    name: "Notion Creator Dashboard",
+    description:
+      "All-in-one Notion workspace for managing content, projects, and revenue. Plug-and-play for any creator workflow.",
+    price: 19 as number | "free",
     href: "#",
+    badge: "Popular",
+    tags: ["Template", "Notion", "Productivity"],
+    rating: 4.8,
   },
   {
     id: "3",
-    title: "AI Prompt Vault",
-    description: "500+ battle-tested prompts organized by use case for ChatGPT, Claude, and more.",
-    price: "$14",
-    category: "Resource",
+    name: "AI Prompt Vault",
+    description:
+      "500+ battle-tested prompts organized by use case for ChatGPT, Claude, and Gemini. Updated monthly.",
+    price: 14 as number | "free",
     href: "#",
+    tags: ["Prompts", "AI", "Resource"],
+    rating: 4.7,
   },
 ] as const;
 
@@ -137,34 +153,41 @@ export const affiliateTools = [
   {
     id: "1",
     name: "Cursor IDE",
-    description: "AI-first code editor that supercharges your development workflow.",
+    description: "AI-first code editor that supercharges your development workflow with real-time pair programming.",
     category: "Development",
-    recommendation: "The best AI coding tool I've used. Saves me hours every day.",
+    recommendation: "The best AI coding tool I've used. Saves me hours every single day. Can't work without it.",
     href: "#",
+    logo: "🖥️",
+    discount: "Free tier",
   },
   {
     id: "2",
-    name: "ConvertKit",
-    description: "Email marketing platform built for creators. Simple, powerful, and scalable.",
+    name: "ConvertKit (Kit)",
+    description: "Email marketing platform built specifically for creators. Simple, powerful, and highly scalable.",
     category: "Email Marketing",
-    recommendation: "My go-to for newsletter growth and automation. Clean UI, powerful automations.",
+    recommendation: "My go-to for newsletter growth and automation. Clean UI, powerful sequences, great deliverability.",
     href: "#",
+    logo: "📧",
+    discount: "Free for 1k subs",
   },
   {
     id: "3",
     name: "Vercel",
-    description: "The best platform for deploying Next.js apps with zero configuration.",
+    description: "The premier platform for deploying Next.js and modern web apps with zero configuration friction.",
     category: "Hosting",
-    recommendation: "Deploy in seconds. The DX is unmatched for modern web apps.",
+    recommendation: "Deploy in seconds. The developer experience is absolutely unmatched for modern web apps.",
     href: "#",
+    logo: "▲",
   },
   {
     id: "4",
     name: "Supabase",
-    description: "Open-source Firebase alternative with PostgreSQL, auth, storage, and realtime.",
+    description: "Open-source Firebase alternative with PostgreSQL, auth, storage, edge functions, and realtime.",
     category: "Backend",
-    recommendation: "My backend of choice. Generous free tier and amazing developer experience.",
+    recommendation: "My backend of choice for every project. Generous free tier and incredible developer experience.",
     href: "#",
+    logo: "⚡",
+    discount: "Free tier",
   },
 ] as const;
 
@@ -172,44 +195,59 @@ export const featuredContent = [
   {
     id: "1",
     title: "How I Built 10 AI Tools in 6 Months",
-    excerpt: "The frameworks, tools, and mindset shifts that helped me ship fast as a solo creator.",
+    excerpt:
+      "The frameworks, tools, and mindset shifts that helped me ship fast as a solo creator with zero funding.",
     category: "Case Study",
-    date: "2025-01-15",
+    date: "Jan 15, 2025",
     href: "#",
+    readTime: "8 min",
   },
   {
     id: "2",
     title: "The Creator's Guide to AI Automation",
-    excerpt: "Stop doing repetitive work. Here's how to automate 80% of your creator workflow with AI.",
+    excerpt:
+      "Stop doing repetitive work. Here's how to automate 80% of your creator workflow using modern AI tools.",
     category: "Tutorial",
-    date: "2025-01-10",
+    date: "Jan 10, 2025",
     href: "#",
+    readTime: "6 min",
   },
   {
     id: "3",
     title: "Why Every Creator Needs a Newsletter",
-    excerpt: "Social media is rented land. Build your own distribution channel with email.",
+    excerpt:
+      "Social media is rented land. Build your own distribution channel with email and own your audience forever.",
     category: "Article",
-    date: "2025-01-05",
+    date: "Jan 5, 2025",
     href: "#",
+    readTime: "5 min",
   },
 ] as const;
 
 export const faqItems = [
   {
     question: "What kind of tools does Sunstroke build?",
-    answer: "I build AI-powered software tools focused on content creation, SEO, automation, and creator workflows. Every tool is designed to help indie builders and creators work smarter and ship faster.",
+    answer:
+      "I build AI-powered software tools focused on content creation, SEO, automation, and creator workflows. Every tool is designed to help indie builders and creators work smarter and ship faster.",
   },
   {
     question: "Are the recommended tools affiliate links?",
-    answer: "Yes, some recommendations include affiliate links. However, I only recommend tools I personally use and trust. My reputation matters more than commissions — every recommendation is genuine.",
+    answer:
+      "Yes, some recommendations include affiliate links. However, I only recommend tools I personally use and trust. My reputation matters more than commissions — every recommendation is genuine.",
   },
   {
     question: "What will I get from the newsletter?",
-    answer: "Weekly insights on AI tools, creator strategies, product building, and exclusive early access to new tools and products. No spam, no fluff — just actionable value.",
+    answer:
+      "Weekly insights on AI tools, creator strategies, product building, and exclusive early access to new tools and products. No spam, no fluff — just actionable value, one email per week.",
   },
   {
     question: "Can I request a custom tool or feature?",
-    answer: "Absolutely! I love building tools that solve real problems. Reach out through the contact page with your idea and I'll see how I can help.",
+    answer:
+      "Absolutely! I love building tools that solve real problems. Reach out through the contact page with your idea and I'll see how I can help.",
+  },
+  {
+    question: "How often are new products released?",
+    answer:
+      "I aim to release a new tool or product every 4-6 weeks. Newsletter subscribers always get first access and exclusive launch discounts.",
   },
 ] as const;

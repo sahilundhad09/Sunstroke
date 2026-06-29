@@ -4,30 +4,20 @@ import { Wrench, Package, Star, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-const iconMap = {
-  wrench: Wrench,
-  package: Package,
-  star: Star,
-} as const;
+const iconMap = { wrench: Wrench, package: Package, star: Star } as const;
 
 const accentMap = {
   cyan: {
-    glow: "rgba(0,212,255,0.15)",
-    border: "rgba(0,212,255,0.2)",
-    text: "text-sunstroke-cyan",
-    bg: "bg-sunstroke-cyan/10",
+    bg: "bg-[#00d4ff]",
+    btn: "bg-[#ffffff]",
   },
   blue: {
-    glow: "rgba(59,130,246,0.15)",
-    border: "rgba(59,130,246,0.2)",
-    text: "text-sunstroke-blue",
-    bg: "bg-sunstroke-blue/10",
+    bg: "bg-[#ff90e8]",
+    btn: "bg-[#ffffff]",
   },
   violet: {
-    glow: "rgba(139,92,246,0.15)",
-    border: "rgba(139,92,246,0.2)",
-    text: "text-sunstroke-violet",
-    bg: "bg-sunstroke-violet/10",
+    bg: "bg-[#ffc700]",
+    btn: "bg-[#ffffff]",
   },
 } as const;
 
@@ -41,60 +31,36 @@ interface PillarCardProps {
   accent: keyof typeof accentMap;
 }
 
-export function PillarCard({
-  title,
-  subtitle,
-  description,
-  href,
-  cta,
-  icon,
-  accent,
-}: PillarCardProps) {
+export function PillarCard({ title, subtitle, description, href, cta, icon, accent }: PillarCardProps) {
   const Icon = iconMap[icon];
   const colors = accentMap[accent];
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.25 }}
+      whileHover={{ y: -6, scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 260, damping: 22 }}
+      className="h-full"
     >
       <Link
         href={href}
-        className="group relative block overflow-hidden rounded-2xl border bg-sunstroke-surface/40 p-6 sm:p-8 transition-all duration-300 backdrop-blur-sm hover:bg-sunstroke-surface/60"
-        style={{
-          borderColor: colors.border,
-        }}
+        className={`group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border-3 border-black ${colors.bg} p-6 shadow-gumroad transition-all duration-200 hover:shadow-gumroad-lg sm:p-8`}
       >
-        {/* Hover glow effect */}
-        <div
-          className="absolute -right-12 -top-12 h-32 w-32 rounded-full opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-          style={{
-            background: `radial-gradient(circle, ${colors.glow}, transparent)`,
-          }}
-        />
-
-        <div className="relative">
-          {/* Icon */}
-          <div
-            className={`mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl ${colors.bg}`}
-          >
-            <Icon className={`h-6 w-6 ${colors.text}`} />
+        <div>
+          {/* Icon Badge */}
+          <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl border-2 border-black bg-white shadow-gumroad-sm">
+            <Icon className="h-6 w-6 text-black stroke-[2.5]" />
           </div>
 
-          {/* Content */}
-          <h3 className="text-2xl font-bold text-white">{title}</h3>
-          <p className={`mt-1 text-sm font-medium ${colors.text}`}>
-            {subtitle}
-          </p>
-          <p className="mt-3 text-sm leading-relaxed text-sunstroke-text-muted">
-            {description}
-          </p>
+          <h3 className="font-heading text-2xl font-black text-black">{title}</h3>
+          <p className="mt-1 font-mono text-xs font-black uppercase tracking-wider text-black">{subtitle}</p>
+          <p className="mt-3 text-sm font-bold leading-relaxed text-zinc-900">{description}</p>
+        </div>
 
-          {/* CTA */}
-          <div className={`mt-6 inline-flex items-center gap-2 text-sm font-semibold ${colors.text}`}>
+        <div className="mt-8">
+          <span className="inline-flex items-center gap-2 rounded-lg border-2 border-black bg-white px-4 py-2 text-xs font-black uppercase tracking-wider text-black shadow-gumroad-sm transition-transform group-hover:translate-x-1">
             {cta}
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </div>
+            <ArrowRight className="h-4 w-4 stroke-[3]" />
+          </span>
         </div>
       </Link>
     </motion.div>

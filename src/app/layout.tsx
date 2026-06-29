@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Inter, Outfit, Lora } from "next/font/google";
 import { Geist_Mono } from "next/font/google";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -14,6 +14,13 @@ const inter = Inter({
 const outfit = Outfit({
   variable: "--font-heading",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const lora = Lora({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -88,9 +95,9 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${inter.variable} ${outfit.variable} ${geistMono.variable} dark scroll-smooth`}
+      className={`${inter.variable} ${outfit.variable} ${lora.variable} ${geistMono.variable} scroll-smooth`}
     >
-      <body className="min-h-screen bg-sunstroke-dark text-sunstroke-text antialiased">
+      <body className="min-h-screen bg-[#f4f1ea] text-black antialiased">
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />

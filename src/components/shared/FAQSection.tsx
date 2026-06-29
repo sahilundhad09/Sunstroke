@@ -25,12 +25,12 @@ export function FAQSection({ items, className = "" }: FAQSectionProps) {
         {items.map((item, index) => (
           <AccordionItem
             key={index}
-            className="rounded-xl border border-sunstroke-border bg-sunstroke-surface/30 px-5 backdrop-blur-sm data-[open]:border-sunstroke-cyan/20 data-[open]:bg-sunstroke-surface/50 transition-colors"
+            className="rounded-xl border-2 border-black bg-white px-5 shadow-gumroad-sm data-[open]:bg-[#ffc700] transition-colors"
           >
-            <AccordionTrigger className="py-4 text-left text-sm font-semibold text-white hover:text-sunstroke-cyan transition-colors hover:no-underline sm:text-base">
+            <AccordionTrigger className="py-4 text-left text-sm font-black text-black hover:text-zinc-700 transition-colors hover:no-underline sm:text-base">
               {item.question}
             </AccordionTrigger>
-            <AccordionContent className="pb-4 text-sm leading-relaxed text-sunstroke-text-muted">
+            <AccordionContent className="pb-4 text-sm font-bold leading-relaxed text-zinc-800">
               {item.answer}
             </AccordionContent>
           </AccordionItem>
