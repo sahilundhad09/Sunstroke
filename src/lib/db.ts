@@ -1,17 +1,32 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Tool, Product, AffiliateLink, Post } from "@/types";
 
-// Public Supabase client for reading data (does not require cookies or request headers)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Helper function to lazily initialize the Supabase client safely
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !anonKey) {
+    console.warn("Supabase environment variables are missing. Database queries will return empty arrays.");
+    return null;
+  }
+
+  try {
+    return createClient(url, anonKey);
+  } catch (err) {
+    console.error("Failed to initialize Supabase client:", err);
+    return null;
+  }
+}
 
 /**
  * Fetches all tools from Supabase.
  */
 export async function getDbTools(): Promise<Tool[]> {
   try {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
     const { data, error } = await supabase
       .from("tools")
       .select("*")
@@ -46,6 +61,9 @@ export async function getDbTools(): Promise<Tool[]> {
  */
 export async function getDbProducts(): Promise<Product[]> {
   try {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
     const { data, error } = await supabase
       .from("products")
       .select("*")
@@ -85,6 +103,9 @@ export async function getDbProducts(): Promise<Product[]> {
  */
 export async function getDbAffiliates(): Promise<AffiliateLink[]> {
   try {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
     const { data, error } = await supabase
       .from("affiliate_links")
       .select("*")
@@ -121,6 +142,9 @@ export async function getDbAffiliates(): Promise<AffiliateLink[]> {
  */
 export async function getDbPosts(): Promise<any[]> {
   try {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
     const { data, error } = await supabase
       .from("posts")
       .select("*")
@@ -169,6 +193,9 @@ export async function getDbPosts(): Promise<any[]> {
  */
 export async function getDbPostBySlug(slug: string): Promise<Post | null> {
   try {
+    const supabase = getSupabaseClient();
+    if (!supabase) return null;
+
     const { data, error } = await supabase
       .from("posts")
       .select("*")
