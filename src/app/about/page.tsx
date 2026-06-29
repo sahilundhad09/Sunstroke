@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const skills = [
   { icon: Cpu, label: "AI & Machine Learning  ", description: "Building intelligent tools with modern AI", bg: "bg-[#00d4ff]" },
-  { icon: Code, label: "Full-Stack Development", description: "Next.js, TypeScript, and modern web tech", bg: "bg-[#ff90e8]" },
+  { icon: Code, label: "Full-Stack Development ", description: "Next.js, TypeScript, and modern web tech", bg: "bg-[#ff90e8]" },
   { icon: Lightbulb, label: "Product Design", description: "Crafting premium digital experiences", bg: "bg-[#ffc700]" },
   { icon: Target, label: "Growth Strategy", description: "Newsletter-led audience building", bg: "bg-[#00e599]" },
   { icon: Rocket, label: "Indie Building", description: "Shipping fast and iterating with users", bg: "bg-[#00d4ff]" },
