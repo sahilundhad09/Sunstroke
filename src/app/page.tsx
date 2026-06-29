@@ -5,7 +5,7 @@ import { FreeValueSection } from "@/components/home/FreeValueSection";
 import { FeaturedContent } from "@/components/home/FeaturedContent";
 import { ClosingCTA } from "@/components/home/ClosingCTA";
 import { getDbPosts } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 
 export default async function HomePage() {
   const posts = await getDbPosts();
@@ -15,7 +15,10 @@ export default async function HomePage() {
   let subscribersCount = 0;
 
   try {
-    const supabase = await createClient();
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
     const [toolsRes, productsRes, subscribersRes] = await Promise.all([
       supabase.from("tools").select("*", { count: "exact", head: true }),
       supabase.from("products").select("*", { count: "exact", head: true }),

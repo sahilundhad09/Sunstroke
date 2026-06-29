@@ -1,12 +1,17 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import type { Tool, Product, AffiliateLink, Post } from "@/types";
+
+// Public Supabase client for reading data (does not require cookies or request headers)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 /**
  * Fetches all tools from Supabase.
  */
 export async function getDbTools(): Promise<Tool[]> {
   try {
-    const supabase = await createClient();
     const { data, error } = await supabase
       .from("tools")
       .select("*")
@@ -41,7 +46,6 @@ export async function getDbTools(): Promise<Tool[]> {
  */
 export async function getDbProducts(): Promise<Product[]> {
   try {
-    const supabase = await createClient();
     const { data, error } = await supabase
       .from("products")
       .select("*")
@@ -81,7 +85,6 @@ export async function getDbProducts(): Promise<Product[]> {
  */
 export async function getDbAffiliates(): Promise<AffiliateLink[]> {
   try {
-    const supabase = await createClient();
     const { data, error } = await supabase
       .from("affiliate_links")
       .select("*")
@@ -118,7 +121,6 @@ export async function getDbAffiliates(): Promise<AffiliateLink[]> {
  */
 export async function getDbPosts(): Promise<any[]> {
   try {
-    const supabase = await createClient();
     const { data, error } = await supabase
       .from("posts")
       .select("*")
@@ -167,7 +169,6 @@ export async function getDbPosts(): Promise<any[]> {
  */
 export async function getDbPostBySlug(slug: string): Promise<Post | null> {
   try {
-    const supabase = await createClient();
     const { data, error } = await supabase
       .from("posts")
       .select("*")
