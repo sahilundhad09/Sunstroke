@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { sendContactNotification } from "@/lib/resend";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -31,50 +32,19 @@ export async function POST(request: Request) {
         });
       }
     } catch (err) {
-      console.error("Supabase contact insert error:", err);
+      console.error("[Contact] Supabase insert error:", err);
     }
 
-    // 2. Send email notification via Resend API
-    const resendKey = process.env.RESEND_API_KEY;
-    const notificationEmail = process.env.NOTIFICATION_EMAIL;
+    // 2. Send notification email to owner via Resend
+    const emailResult = await sendContactNotification({
+      name: data.name,
+      email: data.email,
+      subject: data.subject,
+      message: data.message,
+    });
 
-    if (resendKey && notificationEmail) {
-      try {
-        const res = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${resendKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: "Sunstroke Alert <onboarding@resend.dev>",
-            to: notificationEmail,
-            subject: `📩 New Message: ${data.subject || "Contact Form Inquiry"}`,
-            html: `
-              <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; border: 3px solid #000; border-radius: 12px; background-color: #f4f1ea; box-shadow: 6px 6px 0px #000;">
-                <h2 style="margin-top: 0; font-family: 'Courier New', monospace; font-weight: 900; background: #ff90e8; padding: 10px; border: 2px solid #000; display: inline-block;">
-                  New Sunstroke Inquiry
-                </h2>
-                <p style="font-size: 16px; margin-top: 15px;"><strong>From:</strong> ${data.name} (${data.email})</p>
-                <p style="font-size: 16px;"><strong>Subject:</strong> ${data.subject || "N/A"}</p>
-                <hr style="border: 1px solid #000; margin: 20px 0;" />
-                <p style="font-size: 16px; line-height: 1.6; font-weight: bold; background: white; padding: 15px; border: 2px solid #000; border-radius: 8px;">
-                  ${data.message.replace(/\n/g, "<br />")}
-                </p>
-              </div>
-            `,
-          }),
-        });
-
-        if (!res.ok) {
-          const errorText = await res.text();
-          console.error("Resend API warning:", errorText);
-        }
-      } catch (emailErr) {
-        console.error("Resend notification failed to send:", emailErr);
-      }
-    } else {
-      console.warn("Resend keys not fully configured in env. Skipping notification email...");
+    if (!emailResult.success) {
+      console.warn("[Contact] Notification email not sent:", emailResult.error);
     }
 
     return NextResponse.json({
@@ -89,7 +59,7 @@ export async function POST(request: Request) {
       );
     }
 
-    console.error("Contact API error:", error);
+    console.error("[Contact] Error:", error);
     return NextResponse.json(
       { success: false, error: "Something went wrong. Please try again." },
       { status: 500 }

@@ -14,28 +14,22 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const post = await getDbPostBySlug(slug);
-  
-  if (post) {
+
+  if (!post) {
     return {
-      title: `${post.title} - The Sunstroke Dispatch`,
-      description: post.excerpt || "Read this weekly dispatch issue from Sunstroke.",
+      title: "Post Not Found - The Sunstroke Dispatch",
+      description: "This dispatch issue could not be found.",
     };
   }
 
-  // Fallbacks for mock static slugs
-  const mockTitles: Record<string, string> = {
-    "how-i-built-10-ai-tools-in-6-months": "How I Built 10 AI Tools in 6 Months",
-    "the-creators-guide-to-ai-automation": "The Creator's Guide to AI Automation",
-    "why-every-creator-needs-a-newsletter": "Why Every Creator Needs a Newsletter",
-  };
-
-  const title = mockTitles[slug] || "Newsletter Issue";
   return {
-    title: `${title} - The Sunstroke Dispatch`,
-    description: "Read this weekly dispatch issue from Sunstroke.",
+    title: `${post.title} - The Sunstroke Dispatch`,
+    description: post.excerpt || "Read this weekly dispatch issue from Sunstroke.",
   };
 }
 
@@ -60,88 +54,13 @@ const benefits = [
   },
 ];
 
-// Rich fallback post content mapped by slug
-const fallbackPosts: Record<string, any> = {
-  "how-i-built-10-ai-tools-in-6-months": {
-    title: "How I Built 10 AI Tools in 6 Months",
-    category: "Case Study",
-    date: "Jan 15, 2025",
-    readTime: "8 min",
-    excerpt: "The frameworks, tools, and mindset shifts that helped me ship fast as a solo creator with zero funding.",
-    image: "/images/newsletter_hero_cover.png",
-    content: `
-      <h3>The Core Playbook</h3>
-      <p>Building ten tools in half a year sounds impossible until you build a reuse system. Here is the framework I used to ship fast as a solo builder with zero funding:</p>
-      
-      <blockquote>
-        "The secret is not working 80 hours a week; it's reuse. By building modular boilerplates for authentication, database connection, and payment endpoints, you can focus purely on unique core logic."
-      </blockquote>
 
-      <h3>1. Establish Your Boilerplate</h3>
-      <p>Do not rebuild auth, payments, or database connectors. Build a robust Next.js boilerplate containing pre-styled elements, Supabase configuration, and Stripe webhooks. When starting a new project, copy-paste this base and begin directly at the core feature logic.</p>
-
-      <h3>2. Keep Scope Under Control</h3>
-      <p>A tool only needs to do one thing exceptionally well. Cut out all non-essential features, user settings, or nested views. Build a single page landing + tool interface, compile, and ship.</p>
-    `,
-  },
-  "the-creators-guide-to-ai-automation": {
-    title: "The Creator's Guide to AI Automation",
-    category: "Tutorial",
-    date: "Jan 10, 2025",
-    readTime: "6 min",
-    excerpt: "Stop doing repetitive work. Here's how to automate 80% of your creator workflow using modern AI tools.",
-    image: "/images/newsletter_hero_cover.png",
-    content: `
-      <h3>Stop Repeating Yourself</h3>
-      <p>If you perform a task three times manually, write a script or build an automation. In this dispatch, we walk through setting up Make, Zapier, and Claude to handle content syndication across newsletters, blogs, and social platforms.</p>
-      
-      <h3>1. Map Your Workflow</h3>
-      <p>Document every step from draft to final publish. Identify where copy-pasting, reformatting, or status updating happens. These are the prime targets for API integrations.</p>
-
-      <h3>2. Integrate LLMs via API</h3>
-      <p>Configure automated webhooks that send your raw draft newsletter to Claude to generate optimized metadata, tweet threads, and newsletter summaries, then automatically publish them to Vercel and X.</p>
-    `,
-  },
-  "why-every-creator-needs-a-newsletter": {
-    title: "Why Every Creator Needs a Newsletter",
-    category: "Article",
-    date: "Jan 5, 2025",
-    readTime: "5 min",
-    excerpt: "Social media is rented land. Build your own distribution channel with email and own your audience forever.",
-    image: "/images/newsletter_hero_cover.png",
-    content: `
-      <h3>Own Your Distribution</h3>
-      <p>Relying on social algorithms is building on rented land. In this dispatch, we look at the math of direct email capture and how a newsletter builds compounding brand value.</p>
-      
-      <blockquote>
-        "Algorithms change. Platform policies change. Your subscriber database is a CSV file that you own forever. That is real leverage."
-      </blockquote>
-
-      <h3>1. The Value of Direct Connection</h3>
-      <p>With email, you bypass chronological sorting and recommendation feeds. You show up directly in your reader's personal inbox, allowing deeper long-form value sharing and direct product monetization.</p>
-    `,
-  },
-};
 
 export default async function NewsletterSlugPage({ params }: PageProps) {
   const { slug } = await params;
-  
-  // Try fetching from database first
-  let post = await getDbPostBySlug(slug);
-  
-  // Fallback to static archive posts if not found in db
-  if (!post) {
-    const fallback = fallbackPosts[slug];
-    if (fallback) {
-      post = {
-        id: slug,
-        ...fallback,
-        slug,
-        published: true,
-        created_at: new Date().toISOString(),
-      };
-    }
-  }
+
+  // Fetch from database — no fallbacks, real data only
+  const post = await getDbPostBySlug(slug);
 
   if (!post) {
     notFound();
