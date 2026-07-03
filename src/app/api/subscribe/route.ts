@@ -7,7 +7,7 @@ const subscribeSchema = z.object({
   source: z.string().default("website"),
 });
 
-// Add subscriber to ConvertKit form — triggers welcome sequence automatically
+// ConvertKit v3 API — api_secret goes in the request body
 async function addToConvertKit(email: string, name?: string) {
   const apiSecret = process.env.CONVERTKIT_API_SECRET;
   const formId = process.env.CONVERTKIT_FORM_ID;
@@ -18,27 +18,29 @@ async function addToConvertKit(email: string, name?: string) {
   }
 
   try {
-    const res = await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Kit-Api-Key": apiSecret,
-      },
-      body: JSON.stringify({
-        email_address: email,
-        ...(name && { first_name: name }),
-      }),
-    });
+    const res = await fetch(
+      `https://api.convertkit.com/v3/forms/${formId}/subscribe`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          api_secret: apiSecret,
+          email: email,
+          ...(name && { first_name: name }),
+        }),
+      }
+    );
 
     const json = await res.json();
 
-    if (!res.ok) {
+    if (!res.ok || json.error) {
       console.error("[ConvertKit] API error:", json);
-      return { success: false, error: json?.message };
+      return { success: false, error: json?.message || json?.error };
     }
 
-    console.log("[ConvertKit] Subscriber added successfully:", email);
-    return { success: true, subscriberId: json?.subscriber?.id?.toString() };
+    const subscriberId = json?.subscription?.subscriber?.id?.toString();
+    console.log("[ConvertKit] Subscriber added:", email, "ID:", subscriberId);
+    return { success: true, subscriberId };
   } catch (err) {
     console.error("[ConvertKit] Fetch failed:", err);
     return { success: false };
@@ -81,10 +83,10 @@ export async function POST(request: Request) {
       console.error("[Subscribe] Supabase connection error:", err);
     }
 
-    // 2. Add to ConvertKit — this automatically triggers the welcome sequence
+    // 2. Add to ConvertKit — triggers welcome sequence automatically
     const ckResult = await addToConvertKit(data.email, data.name);
 
-    // 3. Store ConvertKit subscriber ID in Supabase if available
+    // 3. Store ConvertKit subscriber ID back in Supabase if available
     if (supabaseSuccess && ckResult.subscriberId) {
       try {
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -98,7 +100,7 @@ export async function POST(request: Request) {
             .eq("email", data.email);
         }
       } catch {
-        // Non-critical — don't fail the request
+        // Non-critical — don't fail the request over this
       }
     }
 
