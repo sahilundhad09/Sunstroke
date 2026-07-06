@@ -56,6 +56,10 @@ export function NewsletterForm({
       if (result.success) {
         setSubmitted(true);
         reset();
+        // ── Meta Pixel: track Lead on successful email signup ──
+        if (typeof window !== "undefined" && window.fbq) {
+          window.fbq("track", "Lead");
+        }
       } else {
         setError(result.error || "Something went wrong. Please try again.");
       }
