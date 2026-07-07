@@ -1,20 +1,16 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-// ─── SMTP Transporter ─────────────────────────────────────────────────────────
-function createTransporter() {
-  const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_APP_PASSWORD;
-
-  if (!user || !pass) {
-    console.warn("[Mailer] GMAIL_USER or GMAIL_APP_PASSWORD not set.");
+// ─── Resend Client ────────────────────────────────────────────────────────────
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    console.warn("[Mailer] RESEND_API_KEY not set.");
     return null;
   }
-
-  return nodemailer.createTransport({
-    service: "gmail",
-    auth: { user, pass },
-  });
+  return new Resend(key);
 }
+
+const FROM_ADDRESS = "Sunstroke <onboarding@resend.dev>";
 
 // ─── Shared Send Helper ────────────────────────────────────────────────────────
 export async function sendMail({
@@ -22,22 +18,29 @@ export async function sendMail({
   subject,
   html,
 }: {
-  to: string | string[];
+  to: string;
   subject: string;
   html: string;
 }): Promise<{ success: boolean; error?: string }> {
-  const transporter = createTransporter();
-  if (!transporter) return { success: false, error: "Mailer not configured" };
+  const resend = getResend();
+  if (!resend) return { success: false, error: "Mailer not configured" };
 
-  const from = `"Sunstroke by Sahil" <${process.env.GMAIL_USER}>`;
+  const { error } = await resend.emails.send({
+    from: FROM_ADDRESS,
+    to,
+    subject,
+    html,
+    headers: {
+      "List-Unsubscribe": `<${process.env.NEXT_PUBLIC_SITE_URL || "https://sunstroke-gules.vercel.app"}>`,
+    },
+  });
 
-  try {
-    await transporter.sendMail({ from, to, subject, html });
-    return { success: true };
-  } catch (err: any) {
-    console.error("[Mailer] Send failed:", err.message);
-    return { success: false, error: err.message };
+  if (error) {
+    console.error("[Mailer] Send failed:", error);
+    return { success: false, error: error.message };
   }
+
+  return { success: true };
 }
 
 // ─── Welcome Email with OTO ───────────────────────────────────────────────────
@@ -49,7 +52,8 @@ export async function sendWelcomeEmail({
   name?: string;
 }) {
   const greeting = name ? `Hey ${name}` : "Hey there";
-  const OTO_LINK = process.env.OTO_CHECKOUT_LINK || "https://sahilundhad.gumroad.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sunstroke-gules.vercel.app";
+  const OTO_LINK = process.env.OTO_CHECKOUT_LINK || siteUrl;
 
   const html = `
 <!DOCTYPE html>
@@ -57,119 +61,115 @@ export async function sendWelcomeEmail({
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Welcome to Sunstroke ⚡</title>
+  <title>Welcome to Sunstroke</title>
 </head>
 <body style="margin:0;padding:0;background:#f4f1ea;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-  <div style="max-width:600px;margin:32px auto;padding:0 16px;">
+  <div style="max-width:580px;margin:32px auto;padding:0 16px;">
 
     <!-- HEADER -->
-    <div style="background:#000;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;">
-      <span style="background:#ffe566;color:#000;font-weight:900;font-size:22px;letter-spacing:2px;padding:8px 20px;border-radius:8px;display:inline-block;">
-        ⚡ SUNSTROKE
+    <div style="background:#000;border-radius:14px 14px 0 0;padding:28px 32px;text-align:center;">
+      <span style="background:#ffe566;color:#000;font-weight:900;font-size:20px;letter-spacing:2px;padding:7px 18px;border-radius:8px;display:inline-block;">
+        SUNSTROKE
       </span>
-      <p style="color:#aaa;font-size:12px;margin:10px 0 0;letter-spacing:1px;text-transform:uppercase;">
+      <p style="color:#888;font-size:11px;margin:10px 0 0;letter-spacing:1px;text-transform:uppercase;">
         AI · Tools · Products · Creator Resources
       </p>
     </div>
 
     <!-- WELCOME BODY -->
-    <div style="background:#fff;border-left:3px solid #000;border-right:3px solid #000;padding:36px 32px;">
-      <h1 style="margin:0 0 8px;font-size:28px;font-weight:900;color:#000;line-height:1.2;">
-        ${greeting}, welcome to the crew! 🎉
+    <div style="background:#fff;border-left:2px solid #000;border-right:2px solid #000;padding:36px 32px;">
+      <h1 style="margin:0 0 6px;font-size:26px;font-weight:900;color:#000;line-height:1.2;">
+        ${greeting} — welcome aboard! 🎉
       </h1>
-      <p style="color:#444;font-size:15px;line-height:1.7;margin:16px 0;">
-        You just joined a growing community of builders, creators, and AI enthusiasts. 
-        I'm <strong>Sahil</strong> — I build AI-powered tools, ship digital products, 
-        and document every step of the journey.
+      <p style="color:#555;font-size:15px;line-height:1.8;margin:16px 0;">
+        I'm <strong style="color:#000;">Sahil</strong>. I build AI-powered tools, ship digital products, 
+        and share everything I learn along the way — the wins, the failures, and the exact stack I use.
       </p>
 
-      <div style="background:#f4f1ea;border:2px solid #000;border-radius:12px;padding:20px 24px;margin:24px 0;">
-        <p style="margin:0 0 12px;font-weight:900;color:#000;font-size:15px;">🎁 What's coming your way:</p>
-        <ul style="margin:0;padding-left:20px;color:#333;font-size:14px;line-height:2;">
-          <li>Real-world AI tool breakdowns — how I build them, what works</li>
-          <li>Early access to products before public launch</li>
-          <li>Honest insights on building solo in the AI era</li>
-          <li>No fluff — only things actually worth your time</li>
-        </ul>
+      <div style="background:#f4f1ea;border-left:4px solid #ffe566;border-radius:0 8px 8px 0;padding:16px 20px;margin:24px 0;">
+        <p style="margin:0 0 10px;font-weight:900;color:#000;font-size:14px;">What's coming your way:</p>
+        <p style="margin:4px 0;color:#333;font-size:13px;line-height:1.7;">→ Real breakdowns of AI tools (how I actually build them)</p>
+        <p style="margin:4px 0;color:#333;font-size:13px;line-height:1.7;">→ Early access to products before public launch</p>
+        <p style="margin:4px 0;color:#333;font-size:13px;line-height:1.7;">→ Honest insights on building solo in the AI era</p>
+        <p style="margin:4px 0;color:#333;font-size:13px;line-height:1.7;">→ No filler — only things worth your time</p>
       </div>
 
-      <p style="color:#444;font-size:14px;line-height:1.7;margin:0 0 24px;">
-        Hit reply anytime — I personally read every message. 
-        That's a promise, not just a line.
+      <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 28px;">
+        Hit reply and tell me what you're building — I personally read every message.
       </p>
 
       <div style="text-align:center;margin-bottom:8px;">
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://sunstroke-gules.vercel.app"}"
-           style="display:inline-block;background:#000;color:#ffe566;font-weight:900;padding:14px 32px;border-radius:10px;text-decoration:none;font-size:14px;letter-spacing:1px;">
-          → Explore Sunstroke
+        <a href="${siteUrl}" style="display:inline-block;background:#000;color:#ffe566;font-weight:900;padding:14px 30px;border-radius:10px;text-decoration:none;font-size:14px;letter-spacing:0.5px;">
+          Explore Sunstroke →
         </a>
       </div>
     </div>
 
+    <!-- DIVIDER -->
+    <div style="background:#ffe566;height:4px;border-left:2px solid #000;border-right:2px solid #000;"></div>
+
     <!-- OTO SECTION -->
-    <div style="background:#ffe566;border:3px solid #000;border-top:none;border-radius:0 0 0 0;padding:32px;position:relative;">
-      <div style="background:#ff3c3c;color:#fff;font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;display:inline-block;padding:4px 12px;border-radius:4px;margin-bottom:14px;">
-        ⏰ One-Time Offer — For New Subscribers Only
-      </div>
-      <h2 style="margin:0 0 10px;font-size:22px;font-weight:900;color:#000;line-height:1.3;">
+    <div style="background:#fff;border:2px solid #000;border-top:none;padding:28px 32px;">
+      <p style="margin:0 0 4px;font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#666;">
+        Welcome gift — new subscriber offer
+      </p>
+      <h2 style="margin:8px 0 10px;font-size:20px;font-weight:900;color:#000;line-height:1.3;">
         The LinkedIn Visibility Playbook
       </h2>
-      <p style="font-size:15px;font-weight:700;color:#222;margin:0 0 6px;">
+      <p style="font-size:14px;font-weight:700;color:#333;margin:0 0 4px;">
         Turn Your Profile Into a Lead Magnet
       </p>
-      <p style="font-size:14px;color:#333;line-height:1.7;margin:0 0 20px;">
-        Most LinkedIn profiles are invisible. This playbook shows you the exact 
-        system to position yourself as an authority, attract inbound leads, and 
+      <p style="font-size:13px;color:#555;line-height:1.7;margin:0 0 18px;">
+        Most LinkedIn profiles go unnoticed. This playbook walks you through the exact 
+        steps to position yourself as an authority, attract the right people, and 
         grow your network — without posting every single day.
       </p>
 
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
-        <div style="background:#000;color:#ffe566;font-size:28px;font-weight:900;padding:8px 20px;border-radius:8px;display:inline-block;">
+      <p style="margin:0 0 12px;font-size:13px;color:#333;font-weight:600;">What's inside:</p>
+      <p style="margin:3px 0;font-size:13px;color:#333;">✓ Profile optimization checklist (section by section)</p>
+      <p style="margin:3px 0;font-size:13px;color:#333;">✓ Headline formulas that help you get found</p>
+      <p style="margin:3px 0;font-size:13px;color:#333;">✓ Content strategy for people who don't write daily</p>
+      <p style="margin:3px 0;font-size:13px;color:#333;">✓ DM scripts that actually get replies</p>
+      <p style="margin:3px 0 20px;font-size:13px;color:#333;">✓ Real profile examples that convert</p>
+
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+        <span style="background:#000;color:#ffe566;font-size:26px;font-weight:900;padding:8px 18px;border-radius:8px;display:inline-block;">
           $2
+        </span>
+        <div>
+          <p style="margin:0;font-size:12px;color:#888;text-decoration:line-through;">Regular price: $19</p>
+          <p style="margin:2px 0 0;font-size:11px;font-weight:700;color:#000;">Special welcome pricing</p>
         </div>
-        <div style="color:#666;text-decoration:line-through;font-size:16px;font-weight:700;">$19</div>
-        <div style="background:#000;color:#fff;font-size:11px;font-weight:900;padding:4px 10px;border-radius:4px;">90% OFF</div>
       </div>
 
-      <ul style="margin:0 0 24px;padding-left:20px;font-size:14px;color:#333;line-height:2;font-weight:600;">
-        <li>Profile optimization checklist (section by section)</li>
-        <li>Headline formulas that get you found</li>
-        <li>Content strategy for non-writers</li>
-        <li>DM scripts that actually get replies</li>
-        <li>Real examples from profiles that convert</li>
-      </ul>
-
-      <div style="text-align:center;">
-        <a href="${OTO_LINK}"
-           style="display:inline-block;background:#000;color:#ffe566;font-weight:900;font-size:16px;padding:16px 40px;border-radius:10px;text-decoration:none;box-shadow:4px 4px 0 #000;letter-spacing:0.5px;">
-          🚀 Get It for $2 — Limited Time
-        </a>
-        <p style="font-size:11px;color:#666;margin:12px 0 0;">
-          This price disappears after you close this email. No regrets.
-        </p>
-      </div>
+      <a href="${OTO_LINK}" style="display:block;text-align:center;background:#000;color:#ffe566;font-weight:900;font-size:15px;padding:15px 32px;border-radius:10px;text-decoration:none;letter-spacing:0.3px;">
+        Get The Playbook for $2
+      </a>
+      <p style="font-size:11px;color:#999;text-align:center;margin:10px 0 0;">
+        This pricing is available as a welcome gift for new subscribers only.
+      </p>
     </div>
 
     <!-- FOOTER -->
-    <div style="background:#000;border-radius:0 0 16px 16px;padding:20px 32px;text-align:center;">
-      <p style="color:#666;font-size:12px;margin:0;">
-        You subscribed at <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://sunstroke-gules.vercel.app"}" style="color:#ffe566;">sunstroke-gules.vercel.app</a>
-        &nbsp;·&nbsp;
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://sunstroke-gules.vercel.app"}" style="color:#aaa;">Unsubscribe</a>
+    <div style="background:#111;border-radius:0 0 14px 14px;padding:20px 32px;text-align:center;">
+      <p style="color:#555;font-size:12px;margin:0 0 4px;">
+        You signed up at
+        <a href="${siteUrl}" style="color:#ffe566;text-decoration:none;">sunstroke-gules.vercel.app</a>
       </p>
-      <p style="color:#555;font-size:11px;margin:8px 0 0;">
-        © 2026 Sunstroke. Built by Sahil.
+      <p style="color:#444;font-size:11px;margin:0;">
+        © 2026 Sunstroke · Built by Sahil ·
+        <a href="${siteUrl}" style="color:#555;text-decoration:none;">Unsubscribe</a>
       </p>
     </div>
 
   </div>
 </body>
 </html>
-  `;
+  `.trim();
 
   return sendMail({
     to: email,
-    subject: "⚡ Welcome to Sunstroke + a special offer just for you",
+    subject: "Welcome to Sunstroke — here's a gift for you",
     html,
   });
 }
@@ -184,31 +184,44 @@ export async function sendBroadcast({
   subject: string;
   html: string;
 }) {
-  const transporter = createTransporter();
-  if (!transporter) return { success: false, sent: 0, error: "Mailer not configured" };
+  const resend = getResend();
+  if (!resend) return { success: false, sent: 0, error: "Mailer not configured" };
 
-  const from = `"Sunstroke by Sahil" <${process.env.GMAIL_USER}>`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sunstroke-gules.vercel.app";
   let sent = 0;
   const errors: string[] = [];
 
-  // Send in batches of 10 to avoid rate limits
-  const BATCH_SIZE = 10;
+  // Resend supports up to 100 emails per batch request
+  const BATCH_SIZE = 50;
   for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
     const batch = recipients.slice(i, i + BATCH_SIZE);
-    await Promise.all(
-      batch.map(async (email) => {
-        try {
-          await transporter.sendMail({ from, to: email, subject, html });
-          sent++;
-        } catch (err: any) {
-          console.error(`[Broadcast] Failed to send to ${email}:`, err.message);
-          errors.push(email);
-        }
-      })
-    );
-    // Small delay between batches
+
+    const batchPayload = batch.map((email) => ({
+      from: FROM_ADDRESS,
+      to: email,
+      subject,
+      html,
+      headers: {
+        "List-Unsubscribe": `<${siteUrl}>`,
+      },
+    }));
+
+    try {
+      const { data, error } = await resend.batch.send(batchPayload);
+      if (error) {
+        console.error("[Broadcast] Batch error:", error);
+        errors.push(...batch);
+      } else {
+        sent += data?.data?.length ?? batch.length;
+      }
+    } catch (err: any) {
+      console.error("[Broadcast] Batch send failed:", err.message);
+      errors.push(...batch);
+    }
+
+    // Brief pause between batches to respect rate limits
     if (i + BATCH_SIZE < recipients.length) {
-      await new Promise((r) => setTimeout(r, 1000));
+      await new Promise((r) => setTimeout(r, 1200));
     }
   }
 

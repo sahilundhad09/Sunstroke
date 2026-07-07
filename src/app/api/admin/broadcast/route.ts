@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { sendBroadcast } from "@/lib/mailer";
-import { createAdminClient } from "@/lib/supabase/admin";
 
 const broadcastSchema = z.object({
   subject: z.string().min(3, "Subject is required"),
@@ -13,8 +12,20 @@ export async function POST(request: Request) {
     const body = await request.json();
     const data = broadcastSchema.parse(body);
 
-    // Fetch all active subscribers from Supabase
-    const supabase = createAdminClient();
+    // Fetch all active subscribers
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.json(
+        { success: false, error: "Database not configured" },
+        { status: 500 }
+      );
+    }
+
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     const { data: subscribers, error } = await supabase
       .from("subscribers")
       .select("email")
@@ -36,8 +47,6 @@ export async function POST(request: Request) {
     }
 
     const emails = subscribers.map((s: any) => s.email);
-
-    // Send broadcast
     const result = await sendBroadcast({
       recipients: emails,
       subject: data.subject,
@@ -46,7 +55,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `Broadcast sent to ${result.sent} subscribers.`,
+      message: `Broadcast sent to ${result.sent} of ${emails.length} subscribers.`,
       sent: result.sent,
       failed: result.failed,
     });
