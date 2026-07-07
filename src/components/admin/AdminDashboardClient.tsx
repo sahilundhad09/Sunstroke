@@ -14,7 +14,9 @@ import {
   Loader2, 
   Search,
   CheckCircle,
-  Eye
+  Eye,
+  Send,
+  Mail
 } from "lucide-react";
 import Image from "next/image";
 import { AdminModal } from "./AdminModal";
@@ -28,6 +30,12 @@ export function AdminDashboardClient() {
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Broadcast state
+  const [broadcastSubject, setBroadcastSubject] = useState("");
+  const [broadcastBody, setBroadcastBody] = useState("");
+  const [broadcastSending, setBroadcastSending] = useState(false);
+  const [broadcastResult, setBroadcastResult] = useState<{ success: boolean; message: string } | null>(null);
   
   // Modal state
   const [modalState, setModalState] = useState<{
@@ -109,6 +117,32 @@ export function AdminDashboardClient() {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleBroadcast = async () => {
+    if (!broadcastSubject.trim() || !broadcastBody.trim()) {
+      setBroadcastResult({ success: false, message: "Subject and body are both required." });
+      return;
+    }
+    setBroadcastSending(true);
+    setBroadcastResult(null);
+    try {
+      const res = await fetch("/api/admin/broadcast", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject: broadcastSubject, html: broadcastBody }),
+      });
+      const result = await res.json();
+      setBroadcastResult({ success: result.success, message: result.message || result.error });
+      if (result.success) {
+        setBroadcastSubject("");
+        setBroadcastBody("");
+      }
+    } catch {
+      setBroadcastResult({ success: false, message: "Connection failed. Try again." });
+    } finally {
+      setBroadcastSending(false);
     }
   };
 
@@ -479,6 +513,90 @@ export function AdminDashboardClient() {
           fetchStats();
         }}
       />
+
+      {/* ─── Broadcast Email Panel ─────────────────────────────────── */}
+      <div className="mt-8 rounded-2xl border-3 border-black bg-white shadow-gumroad overflow-hidden">
+        {/* Panel Header */}
+        <div className="flex items-center gap-3 border-b-3 border-black bg-[#ffc700] px-6 py-4">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl border-2 border-black bg-black shadow-gumroad-sm">
+            <Mail className="h-5 w-5 text-[#ffc700] stroke-[2.5]" />
+          </div>
+          <div>
+            <h3 className="font-heading text-lg font-black text-black">Broadcast Email</h3>
+            <p className="text-xs font-bold text-zinc-800">
+              Send an email to all {stats.subscribers ?? 0} active subscribers
+            </p>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {/* Subject line */}
+          <div>
+            <label className="block text-xs font-mono font-black uppercase text-black mb-1.5">
+              Subject Line
+            </label>
+            <input
+              type="text"
+              value={broadcastSubject}
+              onChange={(e) => setBroadcastSubject(e.target.value)}
+              placeholder="e.g. 🚀 New article just dropped — check it out"
+              className="h-11 w-full rounded-xl border-2 border-black bg-white px-4 text-sm font-bold text-black placeholder:text-zinc-400 shadow-gumroad-sm focus:outline-none focus:ring-2 focus:ring-black"
+            />
+          </div>
+
+          {/* Email body (HTML) */}
+          <div>
+            <label className="block text-xs font-mono font-black uppercase text-black mb-1.5">
+              Email Body <span className="normal-case text-zinc-500">(HTML supported)</span>
+            </label>
+            <textarea
+              value={broadcastBody}
+              onChange={(e) => setBroadcastBody(e.target.value)}
+              placeholder={`<p>Hey there,</p>\n<p>Just published a new article...</p>\n<a href="https://sunstroke-gules.vercel.app/newsletter">Read it here →</a>`}
+              rows={10}
+              className="w-full rounded-xl border-2 border-black bg-white px-4 py-3 text-sm font-mono text-black placeholder:text-zinc-400 shadow-gumroad-sm focus:outline-none focus:ring-2 focus:ring-black resize-y"
+            />
+          </div>
+
+          {/* Result banner */}
+          {broadcastResult && (
+            <div
+              className={`flex items-start gap-3 rounded-xl border-2 border-black p-4 ${
+                broadcastResult.success ? "bg-[#00e599]" : "bg-red-100"
+              }`}
+            >
+              <CheckCircle className={`h-5 w-5 shrink-0 stroke-[2.5] ${
+                broadcastResult.success ? "text-black" : "text-red-600"
+              }`} />
+              <p className={`text-sm font-bold ${
+                broadcastResult.success ? "text-black" : "text-red-700"
+              }`}>
+                {broadcastResult.message}
+              </p>
+            </div>
+          )}
+
+          {/* Send button */}
+          <div className="flex items-center justify-between pt-2">
+            <p className="text-xs font-bold text-zinc-500">
+              Will be sent to <strong className="text-black">{stats.subscribers ?? 0} subscribers</strong>
+            </p>
+            <button
+              onClick={handleBroadcast}
+              disabled={broadcastSending || !broadcastSubject.trim() || !broadcastBody.trim()}
+              className="btn-gumroad bg-[#000] text-[#ffe566] px-6 py-2.5 text-xs uppercase font-black tracking-wider flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {broadcastSending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4 stroke-[2.5]" />
+              )}
+              {broadcastSending ? "Sending..." : "Send Broadcast"}
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }
