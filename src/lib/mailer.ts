@@ -1,24 +1,31 @@
 import nodemailer from "nodemailer";
 
-// ─── Gmail SMTP Transporter ───────────────────────────────────────────────────
+// ─── Brevo (Sendinblue) SMTP Transporter ─────────────────────────────────────
+// Brevo is a proper ESP with dedicated IPs and established sending reputation.
+// Personal Gmail SMTP flags as spam because Google detects bulk-pattern sending
+// from personal accounts. Brevo's infrastructure does not have this problem.
 function createTransporter() {
-  const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_APP_PASSWORD;
+  const user = process.env.BREVO_SMTP_USER;
+  const pass = process.env.BREVO_SMTP_KEY;
 
-  if (!user || !pass || pass === "your_16_digit_app_password_here") {
-    console.warn("[Mailer] Gmail credentials not configured.");
+  if (!user || !pass) {
+    console.warn("[Mailer] Brevo SMTP credentials not configured (BREVO_SMTP_USER / BREVO_SMTP_KEY).");
     return null;
   }
 
   return nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp-relay.brevo.com",
+    port: 587,
+    secure: false,
     auth: { user, pass },
   });
 }
 
+// The "from" address must be a verified sender in your Brevo account
+const FROM_ADDRESS = `"Sahil (Sunstroke)" <${process.env.BREVO_SMTP_USER || "sunstrokeai@gmail.com"}>`;
+
 // ─── Shared Send Helper ────────────────────────────────────────────────────────
 // Always sends multipart (text + html) — critical for inbox delivery.
-// HTML-only emails are treated as spam by Gmail filters.
 export async function sendMail({
   to,
   subject,
@@ -28,25 +35,24 @@ export async function sendMail({
   to: string | string[];
   subject: string;
   html: string;
-  text: string; // plain text version — required for deliverability
+  text: string;
 }): Promise<{ success: boolean; error?: string }> {
   const transporter = createTransporter();
   if (!transporter) return { success: false, error: "Mailer not configured" };
 
-  const user = process.env.GMAIL_USER!;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sunstroke-gules.vercel.app";
+  const replyTo = process.env.BREVO_SMTP_USER || "sunstrokeai@gmail.com";
 
   try {
     await transporter.sendMail({
-      from: `"Sahil (Sunstroke)" <${user}>`,
+      from: FROM_ADDRESS,
       to,
+      replyTo,
       subject,
-      // Multipart: Gmail spam filters treat HTML-only as suspicious
       text,
       html,
       headers: {
-        // Proper RFC 2369 List-Unsubscribe header — required for bulk senders
-        "List-Unsubscribe": `<mailto:${user}?subject=unsubscribe>, <${siteUrl}/unsubscribe>`,
+        "List-Unsubscribe": `<mailto:${replyTo}?subject=unsubscribe>, <${siteUrl}/unsubscribe>`,
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
         "Precedence": "bulk",
       },
@@ -232,7 +238,7 @@ export async function sendBroadcast({
   const transporter = createTransporter();
   if (!transporter) return { success: false, sent: 0, error: "Mailer not configured" };
 
-  const user = process.env.GMAIL_USER!;
+  const replyTo = process.env.BREVO_SMTP_USER || "sunstrokeai@gmail.com";
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sunstroke-gules.vercel.app";
   let sent = 0;
   const errors: string[] = [];
@@ -244,13 +250,13 @@ export async function sendBroadcast({
       batch.map(async (emailAddr) => {
         try {
           await transporter.sendMail({
-            from: `"Sahil (Sunstroke)" <${user}>`,
+            from: FROM_ADDRESS,
             to: emailAddr,
             subject,
             text,
             html,
             headers: {
-              "List-Unsubscribe": `<mailto:${user}?subject=unsubscribe>, <${siteUrl}/unsubscribe>`,
+              "List-Unsubscribe": `<mailto:${replyTo}?subject=unsubscribe>, <${siteUrl}/unsubscribe>`,
               "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
               "Precedence": "bulk",
             },
