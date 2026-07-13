@@ -21,8 +21,9 @@ function createTransporter() {
   });
 }
 
-// The "from" address must be a verified sender in your Brevo account
-const FROM_ADDRESS = `"Sahil (Sunstroke)" <${process.env.BREVO_SMTP_USER || "sunstrokeai@gmail.com"}>`;
+// FROM_ADDRESS = the email subscribers SEE (must be a verified sender in Brevo)
+// BREVO_SMTP_USER = just the SMTP login credential (not shown to subscribers)
+const FROM_ADDRESS = `"Sahil (Sunstroke)" <${process.env.BREVO_SENDER_EMAIL || "sunstrokeai@gmail.com"}>`;
 
 // ─── Shared Send Helper ────────────────────────────────────────────────────────
 // Always sends multipart (text + html) — critical for inbox delivery.
