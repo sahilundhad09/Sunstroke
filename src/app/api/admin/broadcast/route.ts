@@ -5,6 +5,7 @@ import { sendBroadcast } from "@/lib/mailer";
 const broadcastSchema = z.object({
   subject: z.string().min(3, "Subject is required"),
   html: z.string().min(10, "Email body is required"),
+  text: z.string().optional(), // plain text fallback
 });
 
 export async function POST(request: Request) {
@@ -51,6 +52,8 @@ export async function POST(request: Request) {
       recipients: emails,
       subject: data.subject,
       html: data.html,
+      // Strip HTML tags to generate plain text fallback if not provided
+      text: data.text || data.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
     });
 
     return NextResponse.json({
