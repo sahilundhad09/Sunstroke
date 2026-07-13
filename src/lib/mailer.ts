@@ -1,16 +1,24 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-// ─── Resend Client ────────────────────────────────────────────────────────────
-function getResend() {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) {
-    console.warn("[Mailer] RESEND_API_KEY not set.");
+// ─── Gmail SMTP Transporter ───────────────────────────────────────────────────
+// Gmail SMTP can send to ANY email address with no restrictions.
+// Resend free tier is sandbox-only (sends only to the account owner's email).
+function createTransporter() {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+
+  if (!user || !pass || pass === "your_16_digit_app_password_here") {
+    console.warn("[Mailer] Gmail credentials not configured.");
     return null;
   }
-  return new Resend(key);
+
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: { user, pass },
+  });
 }
 
-const FROM_ADDRESS = "Sunstroke <onboarding@resend.dev>";
+const FROM_NAME = "Sahil from Sunstroke";
 
 // ─── Shared Send Helper ────────────────────────────────────────────────────────
 export async function sendMail({
@@ -18,29 +26,32 @@ export async function sendMail({
   subject,
   html,
 }: {
-  to: string;
+  to: string | string[];
   subject: string;
   html: string;
 }): Promise<{ success: boolean; error?: string }> {
-  const resend = getResend();
-  if (!resend) return { success: false, error: "Mailer not configured" };
+  const transporter = createTransporter();
+  if (!transporter) return { success: false, error: "Mailer not configured" };
 
-  const { error } = await resend.emails.send({
-    from: FROM_ADDRESS,
-    to,
-    subject,
-    html,
-    headers: {
-      "List-Unsubscribe": `<${process.env.NEXT_PUBLIC_SITE_URL || "https://sunstroke-gules.vercel.app"}>`,
-    },
-  });
+  const user = process.env.GMAIL_USER!;
 
-  if (error) {
-    console.error("[Mailer] Send failed:", error);
-    return { success: false, error: error.message };
+  try {
+    await transporter.sendMail({
+      from: `"${FROM_NAME}" <${user}>`,
+      to,
+      subject,
+      html,
+      headers: {
+        // Required by Gmail/Outlook for bulk senders — prevents spam flagging
+        "List-Unsubscribe": `<${process.env.NEXT_PUBLIC_SITE_URL || "https://sunstroke-gules.vercel.app"}>`,
+        "X-Mailer": "Sunstroke Mailer",
+      },
+    });
+    return { success: true };
+  } catch (err: any) {
+    console.error("[Mailer] Send failed:", err.message);
+    return { success: false, error: err.message };
   }
-
-  return { success: true };
 }
 
 // ─── Welcome Email with OTO ───────────────────────────────────────────────────
@@ -79,15 +90,15 @@ export async function sendWelcomeEmail({
     <!-- WELCOME BODY -->
     <div style="background:#fff;border-left:2px solid #000;border-right:2px solid #000;padding:36px 32px;">
       <h1 style="margin:0 0 6px;font-size:26px;font-weight:900;color:#000;line-height:1.2;">
-        ${greeting} — welcome aboard! 🎉
+        ${greeting} — welcome aboard!
       </h1>
       <p style="color:#555;font-size:15px;line-height:1.8;margin:16px 0;">
-        I'm <strong style="color:#000;">Sahil</strong>. I build AI-powered tools, ship digital products, 
+        I'm <strong style="color:#000;">Sahil</strong>. I build AI-powered tools, ship digital products,
         and share everything I learn along the way — the wins, the failures, and the exact stack I use.
       </p>
 
       <div style="background:#f4f1ea;border-left:4px solid #ffe566;border-radius:0 8px 8px 0;padding:16px 20px;margin:24px 0;">
-        <p style="margin:0 0 10px;font-weight:900;color:#000;font-size:14px;">What's coming your way:</p>
+        <p style="margin:0 0 10px;font-weight:900;color:#000;font-size:14px;">What you'll get:</p>
         <p style="margin:4px 0;color:#333;font-size:13px;line-height:1.7;">→ Real breakdowns of AI tools (how I actually build them)</p>
         <p style="margin:4px 0;color:#333;font-size:13px;line-height:1.7;">→ Early access to products before public launch</p>
         <p style="margin:4px 0;color:#333;font-size:13px;line-height:1.7;">→ Honest insights on building solo in the AI era</p>
@@ -95,7 +106,7 @@ export async function sendWelcomeEmail({
       </div>
 
       <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 28px;">
-        Hit reply and tell me what you're building — I personally read every message.
+        Hit reply and tell me what you're building right now — I personally read every message.
       </p>
 
       <div style="text-align:center;margin-bottom:8px;">
@@ -120,15 +131,15 @@ export async function sendWelcomeEmail({
         Turn Your Profile Into a Lead Magnet
       </p>
       <p style="font-size:13px;color:#555;line-height:1.7;margin:0 0 18px;">
-        Most LinkedIn profiles go unnoticed. This playbook walks you through the exact 
-        steps to position yourself as an authority, attract the right people, and 
-        grow your network — without posting every single day.
+        Most LinkedIn profiles go unnoticed. This playbook walks you through
+        the exact steps to position yourself as an authority, attract the right
+        people, and grow your network — without posting every single day.
       </p>
 
-      <p style="margin:0 0 12px;font-size:13px;color:#333;font-weight:600;">What's inside:</p>
+      <p style="margin:0 0 10px;font-size:13px;color:#333;font-weight:600;">What's inside:</p>
       <p style="margin:3px 0;font-size:13px;color:#333;">✓ Profile optimization checklist (section by section)</p>
       <p style="margin:3px 0;font-size:13px;color:#333;">✓ Headline formulas that help you get found</p>
-      <p style="margin:3px 0;font-size:13px;color:#333;">✓ Content strategy for people who don't write daily</p>
+      <p style="margin:3px 0;font-size:13px;color:#333;">✓ Content strategy for people who don't post daily</p>
       <p style="margin:3px 0;font-size:13px;color:#333;">✓ DM scripts that actually get replies</p>
       <p style="margin:3px 0 20px;font-size:13px;color:#333;">✓ Real profile examples that convert</p>
 
@@ -137,7 +148,7 @@ export async function sendWelcomeEmail({
           $2
         </span>
         <div>
-          <p style="margin:0;font-size:12px;color:#888;text-decoration:line-through;">Regular price: $19</p>
+          <p style="margin:0;font-size:12px;color:#888;text-decoration:line-through;">Regular: $19</p>
           <p style="margin:2px 0 0;font-size:11px;font-weight:700;color:#000;">Special welcome pricing</p>
         </div>
       </div>
@@ -164,12 +175,11 @@ export async function sendWelcomeEmail({
 
   </div>
 </body>
-</html>
-  `.trim();
+</html>`.trim();
 
   return sendMail({
     to: email,
-    subject: "Welcome to Sunstroke — here's a gift for you",
+    subject: "Welcome to Sunstroke — here's something for you",
     html,
   });
 }
@@ -184,44 +194,39 @@ export async function sendBroadcast({
   subject: string;
   html: string;
 }) {
-  const resend = getResend();
-  if (!resend) return { success: false, sent: 0, error: "Mailer not configured" };
+  const transporter = createTransporter();
+  if (!transporter) return { success: false, sent: 0, error: "Mailer not configured" };
 
+  const user = process.env.GMAIL_USER!;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sunstroke-gules.vercel.app";
   let sent = 0;
   const errors: string[] = [];
 
-  // Resend supports up to 100 emails per batch request
-  const BATCH_SIZE = 50;
+  // Send in small batches to respect Gmail's rate limits (500/day on free Gmail)
+  const BATCH_SIZE = 10;
   for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
     const batch = recipients.slice(i, i + BATCH_SIZE);
-
-    const batchPayload = batch.map((email) => ({
-      from: FROM_ADDRESS,
-      to: email,
-      subject,
-      html,
-      headers: {
-        "List-Unsubscribe": `<${siteUrl}>`,
-      },
-    }));
-
-    try {
-      const { data, error } = await resend.batch.send(batchPayload);
-      if (error) {
-        console.error("[Broadcast] Batch error:", error);
-        errors.push(...batch);
-      } else {
-        sent += data?.data?.length ?? batch.length;
-      }
-    } catch (err: any) {
-      console.error("[Broadcast] Batch send failed:", err.message);
-      errors.push(...batch);
-    }
-
-    // Brief pause between batches to respect rate limits
+    await Promise.all(
+      batch.map(async (email) => {
+        try {
+          await transporter.sendMail({
+            from: `"Sahil from Sunstroke" <${user}>`,
+            to: email,
+            subject,
+            html,
+            headers: {
+              "List-Unsubscribe": `<${siteUrl}>`,
+            },
+          });
+          sent++;
+        } catch (err: any) {
+          console.error(`[Broadcast] Failed for ${email}:`, err.message);
+          errors.push(email);
+        }
+      })
+    );
     if (i + BATCH_SIZE < recipients.length) {
-      await new Promise((r) => setTimeout(r, 1200));
+      await new Promise((r) => setTimeout(r, 1500));
     }
   }
 
