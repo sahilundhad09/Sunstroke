@@ -6,6 +6,9 @@ import { FadeIn } from "@/components/motion/FadeIn";
 import { NewsletterForm } from "@/components/shared/NewsletterForm";
 import { getDbProducts } from "@/lib/db";
 
+// Always fetch fresh products from Supabase — never serve a stale static build
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Products",
   description:
@@ -26,13 +29,25 @@ export default async function ProductsPage() {
             accentColor="gold"
           />
 
-          <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => (
-              <StaggerItem key={product.id}>
-                <ProductCard {...product} />
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
+          {products.length === 0 ? (
+            <div className="mt-12 flex flex-col items-center justify-center rounded-2xl border-3 border-dashed border-black bg-white py-20 text-center">
+              <span className="text-5xl">📦</span>
+              <h3 className="mt-4 font-heading text-xl font-black text-black">
+                Products coming soon
+              </h3>
+              <p className="mt-2 text-sm font-bold text-zinc-600">
+                Subscribe below to be the first to know when new products drop.
+              </p>
+            </div>
+          ) : (
+            <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((product) => (
+                <StaggerItem key={product.id}>
+                  <ProductCard {...product} />
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          )}
 
           <FadeIn className="mt-16 text-center">
             <div className="gumroad-card mx-auto max-w-2xl bg-[#ff9f0a] p-8 text-black">

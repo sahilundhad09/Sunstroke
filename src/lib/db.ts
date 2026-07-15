@@ -68,7 +68,8 @@ export async function getDbProducts(): Promise<Product[]> {
       .from("products")
       .select("*")
       .eq("status", "active")
-      .order("created_at", { ascending: true });
+      .order("featured", { ascending: false })  // featured products first
+      .order("created_at", { ascending: false }); // then newest first
 
     if (error || !data) {
       if (error) {
