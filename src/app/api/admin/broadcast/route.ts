@@ -4,8 +4,9 @@ import { sendBroadcast } from "@/lib/mailer";
 
 const broadcastSchema = z.object({
   subject: z.string().min(3, "Subject is required"),
-  html: z.string().min(10, "Email body is required"),
-  text: z.string().optional(), // plain text fallback
+  bodyText: z.string().min(10, "Message body is required"),
+  ctaLabel: z.string().optional(),
+  ctaUrl: z.string().url("CTA URL must be a valid URL").optional().or(z.literal("")),
 });
 
 export async function POST(request: Request) {
@@ -48,19 +49,20 @@ export async function POST(request: Request) {
     }
 
     const emails = subscribers.map((s: any) => s.email);
+
     const result = await sendBroadcast({
       recipients: emails,
       subject: data.subject,
-      html: data.html,
-      // Strip HTML tags to generate plain text fallback if not provided
-      text: data.text || data.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
+      bodyText: data.bodyText,
+      ctaLabel: data.ctaLabel || undefined,
+      ctaUrl: data.ctaUrl || undefined,
     });
 
     return NextResponse.json({
       success: true,
-      message: `Broadcast sent to ${result.sent} of ${emails.length} subscribers.`,
+      message: `Broadcast sent to ${result.sent} of ${emails.length} subscribers.${(result.failed ?? 0) > 0 ? ` (${result.failed} failed)` : ""}`,
       sent: result.sent,
-      failed: result.failed,
+      failed: result.failed ?? 0,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {

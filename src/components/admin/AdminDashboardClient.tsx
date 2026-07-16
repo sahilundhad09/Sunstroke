@@ -34,6 +34,8 @@ export function AdminDashboardClient() {
   // Broadcast state
   const [broadcastSubject, setBroadcastSubject] = useState("");
   const [broadcastBody, setBroadcastBody] = useState("");
+  const [broadcastCtaLabel, setBroadcastCtaLabel] = useState("");
+  const [broadcastCtaUrl, setBroadcastCtaUrl] = useState("");
   const [broadcastSending, setBroadcastSending] = useState(false);
   const [broadcastResult, setBroadcastResult] = useState<{ success: boolean; message: string } | null>(null);
   
@@ -122,7 +124,11 @@ export function AdminDashboardClient() {
 
   const handleBroadcast = async () => {
     if (!broadcastSubject.trim() || !broadcastBody.trim()) {
-      setBroadcastResult({ success: false, message: "Subject and body are both required." });
+      setBroadcastResult({ success: false, message: "Subject and message body are both required." });
+      return;
+    }
+    if (broadcastCtaUrl && !broadcastCtaUrl.startsWith("http")) {
+      setBroadcastResult({ success: false, message: "CTA URL must start with https://" });
       return;
     }
     setBroadcastSending(true);
@@ -131,13 +137,20 @@ export function AdminDashboardClient() {
       const res = await fetch("/api/admin/broadcast", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject: broadcastSubject, html: broadcastBody }),
+        body: JSON.stringify({
+          subject: broadcastSubject,
+          bodyText: broadcastBody,
+          ctaLabel: broadcastCtaLabel || undefined,
+          ctaUrl: broadcastCtaUrl || undefined,
+        }),
       });
       const result = await res.json();
       setBroadcastResult({ success: result.success, message: result.message || result.error });
       if (result.success) {
         setBroadcastSubject("");
         setBroadcastBody("");
+        setBroadcastCtaLabel("");
+        setBroadcastCtaUrl("");
       }
     } catch {
       setBroadcastResult({ success: false, message: "Connection failed. Try again." });
@@ -515,86 +528,164 @@ export function AdminDashboardClient() {
       />
 
       {/* ─── Broadcast Email Panel ─────────────────────────────────── */}
-      <div className="mt-8 rounded-2xl border-3 border-black bg-white shadow-gumroad overflow-hidden">
-        {/* Panel Header */}
-        <div className="flex items-center gap-3 border-b-3 border-black bg-[#ffc700] px-6 py-4">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl border-2 border-black bg-black shadow-gumroad-sm">
-            <Mail className="h-5 w-5 text-[#ffc700] stroke-[2.5]" />
+      <div className="mt-10 rounded-2xl border-3 border-black bg-white shadow-gumroad overflow-hidden">
+
+        {/* Panel header */}
+        <div className="flex items-center justify-between border-b-3 border-black bg-[#ffc700] px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border-2 border-black bg-black shadow-gumroad-sm">
+              <Mail className="h-5 w-5 text-[#ffc700] stroke-[2.5]" />
+            </div>
+            <div>
+              <h3 className="font-heading text-lg font-black text-black">Broadcast Email</h3>
+              <p className="text-xs font-bold text-zinc-800">
+                Send to all <span className="font-black">{stats.subscribers ?? 0}</span> active subscribers
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-heading text-lg font-black text-black">Broadcast Email</h3>
-            <p className="text-xs font-bold text-zinc-800">
-              Send an email to all {stats.subscribers ?? 0} active subscribers
-            </p>
+          {/* Sender badge */}
+          <div className="hidden sm:flex items-center gap-2 rounded-lg border-2 border-black bg-white px-3 py-1.5">
+            <div className="h-2 w-2 rounded-full bg-[#00e599]" />
+            <span className="text-xs font-mono font-black text-black">via Brevo SMTP</span>
           </div>
         </div>
 
-        <div className="p-6 space-y-4">
-          {/* Subject line */}
-          <div>
-            <label className="block text-xs font-mono font-black uppercase text-black mb-1.5">
-              Subject Line
-            </label>
-            <input
-              type="text"
-              value={broadcastSubject}
-              onChange={(e) => setBroadcastSubject(e.target.value)}
-              placeholder="e.g. 🚀 New article just dropped — check it out"
-              className="h-11 w-full rounded-xl border-2 border-black bg-white px-4 text-sm font-bold text-black placeholder:text-zinc-400 shadow-gumroad-sm focus:outline-none focus:ring-2 focus:ring-black"
-            />
+        <div className="grid gap-0 lg:grid-cols-2">
+
+          {/* Left — Composer */}
+          <div className="p-6 space-y-4 border-b-3 lg:border-b-0 lg:border-r-3 border-black">
+            <p className="text-xs font-mono font-black uppercase text-zinc-500 tracking-wider">Compose</p>
+
+            {/* Subject */}
+            <div>
+              <label className="block text-xs font-mono font-black uppercase text-black mb-1.5">Subject Line *</label>
+              <input
+                type="text"
+                value={broadcastSubject}
+                onChange={(e) => setBroadcastSubject(e.target.value)}
+                placeholder="e.g. New article — how I built an AI tool in 3 days"
+                className="h-11 w-full rounded-xl border-2 border-black bg-white px-4 text-sm font-bold text-black placeholder:text-zinc-400 shadow-gumroad-sm focus:outline-none focus:ring-2 focus:ring-black"
+              />
+            </div>
+
+            {/* Body */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-mono font-black uppercase text-black">Message Body *</label>
+                <span className="text-xs font-mono text-zinc-400">{broadcastBody.length} chars</span>
+              </div>
+              <textarea
+                value={broadcastBody}
+                onChange={(e) => setBroadcastBody(e.target.value)}
+                placeholder={`Write your message here. Use blank lines between paragraphs.\n\nExample:\nHey,\n\nJust published a new article on how I built [X].\n\nHere's what I learned after 3 failed attempts...`}
+                rows={9}
+                className="w-full rounded-xl border-2 border-black bg-white px-4 py-3 text-sm text-black placeholder:text-zinc-400 shadow-gumroad-sm focus:outline-none focus:ring-2 focus:ring-black resize-y leading-relaxed"
+              />
+              <p className="mt-1 text-xs text-zinc-400">Plain text — auto-wrapped in Sunstroke brand template. Use blank lines for new paragraphs.</p>
+            </div>
+
+            {/* CTA (optional) */}
+            <div className="rounded-xl border-2 border-dashed border-zinc-300 p-4 space-y-3">
+              <p className="text-xs font-mono font-black uppercase text-zinc-500">CTA Button (optional)</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-600 mb-1">Button Label</label>
+                  <input
+                    type="text"
+                    value={broadcastCtaLabel}
+                    onChange={(e) => setBroadcastCtaLabel(e.target.value)}
+                    placeholder="Read the article"
+                    className="h-9 w-full rounded-lg border-2 border-black bg-white px-3 text-xs font-bold text-black placeholder:text-zinc-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-600 mb-1">Button URL</label>
+                  <input
+                    type="url"
+                    value={broadcastCtaUrl}
+                    onChange={(e) => setBroadcastCtaUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="h-9 w-full rounded-lg border-2 border-black bg-white px-3 text-xs font-bold text-black placeholder:text-zinc-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Email body (HTML) */}
-          <div>
-            <label className="block text-xs font-mono font-black uppercase text-black mb-1.5">
-              Email Body <span className="normal-case text-zinc-500">(HTML supported)</span>
-            </label>
-            <textarea
-              value={broadcastBody}
-              onChange={(e) => setBroadcastBody(e.target.value)}
-              placeholder={`<p>Hey there,</p>\n<p>Just published a new article...</p>\n<a href="https://sunstroke-gules.vercel.app/newsletter">Read it here →</a>`}
-              rows={10}
-              className="w-full rounded-xl border-2 border-black bg-white px-4 py-3 text-sm font-mono text-black placeholder:text-zinc-400 shadow-gumroad-sm focus:outline-none focus:ring-2 focus:ring-black resize-y"
-            />
-          </div>
+          {/* Right — Preview */}
+          <div className="p-6 space-y-3 bg-zinc-50">
+            <p className="text-xs font-mono font-black uppercase text-zinc-500 tracking-wider">Live Preview</p>
 
-          {/* Result banner */}
+            {/* Mini email mock */}
+            <div className="rounded-xl border-2 border-black overflow-hidden shadow-gumroad-sm">
+              {/* Mock header */}
+              <div className="bg-black px-4 py-3 text-center">
+                <span className="inline-block bg-[#FFE566] text-black text-xs font-black px-3 py-1 rounded-md tracking-widest">SUNSTROKE</span>
+              </div>
+              {/* Subject preview */}
+              <div className="bg-white px-4 py-3 border-b border-zinc-200">
+                <p className="text-xs text-zinc-400 font-mono">Subject:</p>
+                <p className="text-sm font-black text-black mt-0.5">
+                  {broadcastSubject || <span className="text-zinc-300 font-normal">Your subject line will appear here</span>}
+                </p>
+              </div>
+              {/* Body preview */}
+              <div className="bg-white px-4 py-4 min-h-[140px] max-h-[220px] overflow-y-auto">
+                {broadcastBody ? (
+                  broadcastBody.split(/\n\n+/).filter(Boolean).map((para, i) => (
+                    <p key={i} className="text-sm text-zinc-700 leading-relaxed mb-3 last:mb-0">
+                      {para.replace(/\n/g, " ")}
+                    </p>
+                  ))
+                ) : (
+                  <p className="text-sm text-zinc-300">Your message will appear here...</p>
+                )}
+              </div>
+              {/* CTA preview */}
+              {broadcastCtaLabel && (
+                <div className="bg-white px-4 pb-4">
+                  <div className="inline-block bg-black text-[#FFE566] text-xs font-black px-4 py-2 rounded-lg">
+                    {broadcastCtaLabel} →
+                  </div>
+                </div>
+              )}
+              {/* Mock footer */}
+              <div className="bg-zinc-800 px-4 py-2 text-center">
+                <p className="text-xs text-zinc-500">© 2026 Sunstroke · Unsubscribe</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom bar — result + send */}
+        <div className="border-t-3 border-black bg-zinc-50 px-6 py-4">
           {broadcastResult && (
-            <div
-              className={`flex items-start gap-3 rounded-xl border-2 border-black p-4 ${
-                broadcastResult.success ? "bg-[#00e599]" : "bg-red-100"
-              }`}
-            >
-              <CheckCircle className={`h-5 w-5 shrink-0 stroke-[2.5] ${
+            <div className={`flex items-start gap-3 rounded-xl border-2 border-black p-3 mb-4 ${
+              broadcastResult.success ? "bg-[#00e599]" : "bg-red-100"
+            }`}>
+              <CheckCircle className={`h-4 w-4 shrink-0 mt-0.5 stroke-[2.5] ${
                 broadcastResult.success ? "text-black" : "text-red-600"
               }`} />
               <p className={`text-sm font-bold ${
                 broadcastResult.success ? "text-black" : "text-red-700"
-              }`}>
-                {broadcastResult.message}
-              </p>
+              }`}>{broadcastResult.message}</p>
             </div>
           )}
-
-          {/* Send button */}
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center justify-between">
             <p className="text-xs font-bold text-zinc-500">
-              Will be sent to <strong className="text-black">{stats.subscribers ?? 0} subscribers</strong>
+              Sending to <strong className="text-black">{stats.subscribers ?? 0} subscribers</strong> via Brevo
             </p>
             <button
               onClick={handleBroadcast}
               disabled={broadcastSending || !broadcastSubject.trim() || !broadcastBody.trim()}
               className="btn-gumroad bg-[#000] text-[#ffe566] px-6 py-2.5 text-xs uppercase font-black tracking-wider flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {broadcastSending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4 stroke-[2.5]" />
-              )}
+              {broadcastSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 stroke-[2.5]" />}
               {broadcastSending ? "Sending..." : "Send Broadcast"}
             </button>
           </div>
         </div>
+
       </div>
 
     </div>
