@@ -21,7 +21,7 @@ function createTransporter() {
 
 // Visible "From" address — must be a verified sender in your Brevo account
 function getFromAddress() {
-  const email = process.env.BREVO_SENDER_EMAIL || "sunstrokeai@gmail.com";
+  const email = process.env.BREVO_SENDER_EMAIL || "hello@sunstroke.tech";
   return `"Sahil (Sunstroke)" <${email}>`;
 }
 
@@ -41,7 +41,7 @@ export async function sendMail({
   if (!transporter) return { success: false, error: "Mailer not configured" };
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sunstroke-gules.vercel.app";
-  const replyTo = process.env.BREVO_SENDER_EMAIL || "sunstrokeai@gmail.com";
+  const replyTo = process.env.BREVO_SENDER_EMAIL || "hello@sunstroke.tech";
 
   try {
     await transporter.sendMail({
@@ -137,7 +137,7 @@ export async function sendBroadcast({
   if (!transporter) return { success: false, sent: 0, error: "Mailer not configured" };
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sunstroke-gules.vercel.app";
-  const replyTo = process.env.BREVO_SENDER_EMAIL || "sunstrokeai@gmail.com";
+  const replyTo = process.env.BREVO_SENDER_EMAIL || "hello@sunstroke.tech";
 
   // Generate branded HTML from admin's plain text
   const html = broadcastEmailHtml({ subject, bodyText, ctaLabel, ctaUrl, siteUrl });

@@ -3,7 +3,7 @@
 // brand identity. Built with table-based HTML for maximum email client support.
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sunstroke-gules.vercel.app";
-const SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL || "sunstrokeai@gmail.com";
+const SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL || "hello@sunstroke.tech";
 
 // ─── Shared Shell ─────────────────────────────────────────────────────────────
 // Wraps any inner content with the Sunstroke header + footer
